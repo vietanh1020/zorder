@@ -14,7 +14,4 @@ export class Menu extends BaseEntity {
 
   @Property()
   description: string;
-
-  @Property({ fieldName: 'deleted_at' })
-  deletedAt: Date;
 }
