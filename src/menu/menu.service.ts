@@ -12,10 +12,6 @@ export class MenuService {
     private entityManager: EntityManager,
   ) {}
 
-  // getMenu(companyId): string {
-  //   return 'Hello World!';
-  // }
-
   async getMenu(companyId: string) {
     const list = this.menuRepository.find({ companyId });
     return list;
