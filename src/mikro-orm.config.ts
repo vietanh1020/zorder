@@ -1,6 +1,5 @@
 import { Options } from '@mikro-orm/core';
 import { ConfigService } from '@nestjs/config';
-import { Menu } from './database/entities/index.js';
 
 const configService = new ConfigService();
 
@@ -13,7 +12,6 @@ const MikroOrmConfig: Options = {
   password: configService.get('DB_PASS'),
   discovery: { warnWhenNoEntities: false },
   entities: ['./dist/database/entities'],
-  // entitiesTs: [Menu],
   migrations: {
     path: './dist/database/migrations',
     pathTs: './src/database/migrations',

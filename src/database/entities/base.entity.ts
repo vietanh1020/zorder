@@ -11,6 +11,6 @@ export abstract class BaseEntity {
   @Property({ fieldName: 'updated_at', onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
-  @Property({ nullable: true })
+  @Property({ fieldName: 'deleted_at', nullable: true })
   deletedAt: Date;
 }
