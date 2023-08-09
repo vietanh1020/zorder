@@ -1,10 +1,16 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
+import { CreateAdminDto } from './dto';
 
-@Controller('users')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('/admin')
+  async createAdmin(@Body() adminDto: CreateAdminDto) {
+    return this.userService.createAdmin(adminDto);
+  }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
