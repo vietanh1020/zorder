@@ -6,6 +6,8 @@ import {
   IsNotEmpty,
   IsObject,
   IsString,
+  Matches,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -32,6 +34,10 @@ export class CreateAdminDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(8)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message: 'Password too weak',
+  })
   password: string;
 
   @ValidateNested()
