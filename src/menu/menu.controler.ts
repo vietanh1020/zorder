@@ -1,21 +1,24 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CreateFoodDto } from './dto';
 import { MenuService } from './menu.service';
+import { AuthGuard } from '@/common/guards';
+import { JwtUser } from '@/common/decorators';
 
 @Controller('/menu')
 export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
-  @Get()
-  async getMenu() {
-    const companyId = '1231381830138083018301';
+  @Get(':id')
+  async getMenu(@Param() companyId: string) {
     return this.menuService.getMenu(companyId);
   }
 
   @Post()
-  async createFood(@Body() foodDto: CreateFoodDto) {
-    console.log({ foodDto });
-
-    return this.menuService.createFood(foodDto, '1231381830138083018301');
+  @UseGuards(AuthGuard)
+  async createFood(
+    @Body() foodDto: CreateFoodDto,
+    @JwtUser('company_id') companyId: string,
+  ) {
+    return this.menuService.createFood(foodDto, companyId);
   }
 }
