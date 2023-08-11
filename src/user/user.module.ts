@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-
 import { Company, User } from '@/database/entities';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { JwtService } from '@nestjs/jwt';
