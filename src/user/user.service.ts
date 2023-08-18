@@ -52,7 +52,7 @@ export class UserService {
       email,
     });
 
-    const validPassword = await bcrypt.compare(password, user?.password);
+    const validPassword = await bcrypt.compare(password, user?.password || '');
 
     if (!user || !validPassword)
       throw new BadRequestException('Email hoặc mật khẩu không đúng!');
