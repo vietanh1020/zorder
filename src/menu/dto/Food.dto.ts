@@ -1,8 +1,14 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { CreateFoodOptionDto } from './FoodOption.dto';
 
-export class CreateFoodDto {
+export class FoodDto {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -10,6 +16,10 @@ export class CreateFoodDto {
   @IsString()
   @IsNotEmpty()
   image: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  price: number;
 
   @IsString()
   description: string;
