@@ -1,8 +1,12 @@
 import { Food, FoodOption } from '@/database/entities';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateFoodDto } from './dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { FoodDto } from './dto';
 
 @Injectable()
 export class MenuService {
@@ -15,31 +19,13 @@ export class MenuService {
   ) {}
 
   async getMenu(companyId: string) {
-    const qb = this.entityManager.createQueryBuilder(
-      'SELECT * FROM public.food',
+    return await this.foodRepository.find(
+      { companyId },
+      { populate: ['options'] },
     );
-
-    console.log(qb);
-
-    // const listFood = await this.foodRepository.find({ companyId });
-
-    // const data = listFood.map(async (food) => {
-    //   const listOption = await this.optionRepository.find({ foodId: food.id });
-
-    //   console.log(listOption);
-
-    //   return {
-    //     ...food,
-    //     listOption: listOption,
-    //   };
-    // });
-
-    // console.log({ data });
-
-    return qb;
   }
 
-  async createFood(food: CreateFoodDto, companyId: string) {
+  async createFood(food: FoodDto, companyId: string) {
     const { name } = food;
 
     const menu: Food = await this.foodRepository.findOne({
@@ -62,13 +48,19 @@ export class MenuService {
 
     food.foodOption.forEach(async (foodOption) => {
       try {
+        // const option = await this.optionRepository.findOne({
+        //   foodId: createFood.id,
+        //   label: foodOption.label,
+        // });
+
+        // if (option) return `${foodOption.label} bị trùng!`;
+
         const createOption = this.optionRepository.create({
           ...foodOption,
           foodId: createFood.id,
         });
 
-        ListCreateOption.push(foodOption);
-
+        ListCreateOption.push(createOption);
         await this.optionRepository.persistAndFlush(createOption);
       } catch (error) {
         throw new BadRequestException(
@@ -81,5 +73,56 @@ export class MenuService {
       ...createFood,
       listOption: ListCreateOption,
     };
+  }
+
+  async updateFood(id: string, updateFood: FoodDto) {
+    const food = await this.foodRepository.findOne(
+      { id },
+      { populate: ['options'] },
+    );
+
+    if (!food) {
+      throw new NotFoundException(`Food with ID ${id} not found`);
+    }
+
+    this.foodRepository.assign(food, updateFood);
+
+    await this.foodRepository.persistAndFlush(food);
+
+    for (const option of food.options) {
+      await this.optionRepository.removeAndFlush(option);
+    }
+
+    for (const option of updateFood.foodOption) {
+      try {
+        const createOption = this.optionRepository.create({
+          ...option,
+          foodId: food.id,
+        });
+
+        await this.optionRepository.persistAndFlush(createOption);
+      } catch (error) {
+        throw new BadRequestException('Error create option ' + option.label);
+      }
+    }
+
+    return food;
+  }
+
+  async deleteFood(id: string) {
+    const food = await this.foodRepository.findOne(
+      {
+        id,
+      },
+      { populate: ['options'] },
+    );
+
+    if (!food) {
+      throw new BadRequestException(['food name not existed']);
+    }
+
+    await this.foodRepository.removeAndFlush(food);
+
+    return food;
   }
 }
