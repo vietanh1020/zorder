@@ -29,5 +29,5 @@ export class User extends BaseEntity {
   role: string;
 
   @ManyToOne({ entity: () => Company, nullable: true })
-  food: Company;
+  company: Company;
 }
