@@ -1,5 +1,4 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { CacheModule } from '@nestjs/cache-manager';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -11,11 +10,16 @@ import { UserModule } from './user/user.module';
 import { BullModule } from '@nestjs/bull';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
     CacheModule.register({
       isGlobal: true,
+      store: redisStore,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT,
     }),
     ConfigModule.forRoot({
       load: [appConfig],
@@ -29,6 +33,9 @@ import { join } from 'path';
     }),
     BullModule.registerQueue({
       name: 'emailSending',
+    }),
+    BullModule.registerQueue({
+      name: 'orders',
     }),
     MailerModule.forRoot({
       transport: {

@@ -3,10 +3,13 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { FoodDto } from './dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class MenuService {
@@ -16,13 +19,22 @@ export class MenuService {
     @InjectRepository(FoodOption)
     private readonly optionRepository: EntityRepository<FoodOption>,
     private entityManager: EntityManager,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getMenu(companyId: string) {
-    return await this.foodRepository.find(
-      { companyId },
-      { populate: ['options'] },
-    );
+    let menu = await this.cacheManager.get('menu_' + companyId);
+
+    if (!menu) {
+      menu = await this.foodRepository.find(
+        { companyId },
+        { populate: ['options'] },
+      );
+
+      await this.cacheManager.set('menu_' + companyId, menu);
+    }
+
+    return menu;
   }
 
   async createFood(food: FoodDto, companyId: string) {
@@ -36,6 +48,8 @@ export class MenuService {
     if (menu) {
       throw new BadRequestException(['food name already existed']);
     }
+
+    await this.cacheManager.del('menu_' + companyId);
 
     const createFood = this.foodRepository.create({
       ...food,
@@ -106,6 +120,8 @@ export class MenuService {
       }
     }
 
+    await this.cacheManager.del('menu_' + food.companyId);
+
     return food;
   }
 
@@ -122,6 +138,8 @@ export class MenuService {
     }
 
     await this.foodRepository.removeAndFlush(food);
+
+    await this.cacheManager.del('menu_' + food.companyId);
 
     return food;
   }
