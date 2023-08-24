@@ -12,6 +12,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -34,9 +35,7 @@ import * as redisStore from 'cache-manager-redis-store';
     BullModule.registerQueue({
       name: 'emailSending',
     }),
-    BullModule.registerQueue({
-      name: 'orders',
-    }),
+
     MailerModule.forRoot({
       transport: {
         host: 'smtp.example.com',
@@ -55,6 +54,7 @@ import * as redisStore from 'cache-manager-redis-store';
     MikroOrmModule.forRoot(),
     MenuModule,
     UserModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

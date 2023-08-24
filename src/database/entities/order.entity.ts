@@ -1,8 +1,11 @@
-import { Entity, ManyToOne, Property } from '@mikro-orm/core';
+import { Entity, Property } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
-import { Company } from './company.entity';
-import { FoodOrderDto } from '@/order/dto';
+import { Food } from './food.entity';
 
+type FoodOrder = {
+  price: number;
+  food: Food;
+};
 @Entity({ tableName: 'order' })
 export class Order extends BaseEntity {
   @Property({ fieldName: 'company_id' })
@@ -11,15 +14,12 @@ export class Order extends BaseEntity {
   @Property({ fieldName: 'table_id' })
   tableId: string;
 
-  @Property({ fieldName: 'table_number' })
-  tableNumber: number;
+  @Property({ fieldName: 'total_money' })
+  total: number;
 
   @Property()
   note: string;
 
   @Property({ type: 'json', nullable: true })
-  foods: FoodOrderDto[];
-
-  @ManyToOne({ entity: () => Company, nullable: true })
-  company: Company;
+  foods: FoodOrder[];
 }
