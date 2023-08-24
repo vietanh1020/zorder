@@ -2,7 +2,7 @@ import { Food, FoodOption } from '@/database/entities';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { MenuController } from './menu.controler';
+import { MenuController } from './menu.controller';
 import { MenuService } from './menu.service';
 
 @Module({

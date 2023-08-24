@@ -23,7 +23,7 @@ export class OrderService {
   }
 
   async createOrder(order: CreateOrderDto) {
-    const { companyId } = order;
+    const { companyId, tableId, note } = order;
     let menu: any = await this.cacheManager.get('menu_' + companyId);
     if (!menu) {
       menu = await this.menuService.getMenu(companyId);
@@ -67,8 +67,9 @@ export class OrderService {
 
     const createOrder = this.orderRepository.create({
       total,
-      note: order.note,
+      note,
       foods: foodReceipt,
+      tableId,
       companyId,
     });
 
