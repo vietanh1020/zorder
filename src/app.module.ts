@@ -1,18 +1,18 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { BullModule } from '@nestjs/bull';
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import * as redisStore from 'cache-manager-redis-store';
+import { join } from 'path';
 import appConfig from './app.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MenuModule } from './menu/menu.module';
-import { UserModule } from './user/user.module';
-import { BullModule } from '@nestjs/bull';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { join } from 'path';
-import { CacheModule } from '@nestjs/cache-manager';
-import * as redisStore from 'cache-manager-redis-store';
 import { OrderModule } from './order/order.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -31,9 +31,6 @@ import { OrderModule } from './order/order.module';
         host: 'localhost',
         port: 6379,
       },
-    }),
-    BullModule.registerQueue({
-      name: 'emailSending',
     }),
 
     MailerModule.forRoot({
