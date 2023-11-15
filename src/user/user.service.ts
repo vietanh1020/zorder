@@ -100,7 +100,7 @@ export class UserService {
     // Create user
     const createUser = this.usersRepository.create({
       ...user,
-      role: 'admin',
+      role: 'owner',
       password: hashed,
       companyId: createCompany.id,
     });

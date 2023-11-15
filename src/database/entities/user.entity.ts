@@ -1,6 +1,7 @@
 import { Entity, ManyToOne, Property } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
 import { Company } from './company.entity';
+import { RoleType } from '@/types';
 
 @Entity({ tableName: 'user' })
 export class User extends BaseEntity {
@@ -26,7 +27,7 @@ export class User extends BaseEntity {
   password: string;
 
   @Property()
-  role: string;
+  role: RoleType;
 
   @ManyToOne({ entity: () => Company, nullable: true })
   company: Company;
