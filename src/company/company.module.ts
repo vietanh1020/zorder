@@ -1,4 +1,4 @@
-import { Company, Food, FoodOption } from '@/database/entities';
+import { Company } from '@/database/entities';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,4 +10,4 @@ import { CompanyService } from './company.service';
   controllers: [CompanyController],
   providers: [CompanyService, JwtService],
 })
-export class MenuModule {}
+export class CompanyModule {}

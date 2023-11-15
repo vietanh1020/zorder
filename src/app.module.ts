@@ -13,6 +13,7 @@ import { AppService } from './app.service';
 import { MenuModule } from './menu/menu.module';
 import { OrderModule } from './order/order.module';
 import { UserModule } from './user/user.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { UserModule } from './user/user.module';
     MenuModule,
     UserModule,
     OrderModule,
+    CompanyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
