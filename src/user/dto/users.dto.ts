@@ -1,4 +1,4 @@
-import { CreateCompanyDto } from '@/company/dto';
+import { CompanyDto } from '@/company/dto';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
@@ -42,6 +42,6 @@ export class CreateAdminDto {
 
   @ValidateNested()
   @IsObject()
-  @Type(() => CreateCompanyDto)
-  company: CreateCompanyDto;
+  @Type(() => CompanyDto)
+  company: CompanyDto;
 }
