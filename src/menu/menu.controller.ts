@@ -19,7 +19,12 @@ export class MenuController {
 
   @Get()
   @UseGuards(AuthGuard)
-  async getMenu(@JwtUser('company_id') companyId: string) {
+  async adminGetMenu(@JwtUser('company_id') companyId: string) {
+    return this.menuService.getMenu(companyId);
+  }
+
+  @Get(':id')
+  async getMenu(@Param('id') companyId: string) {
     return this.menuService.getMenu(companyId);
   }
 
