@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { APP_CONFIG_NAME } from 'src/configs/app.config';
 import Stripe from 'stripe';
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
   constructor(private config: ConfigService) {
-    this.stripe = new Stripe(
-      this.config.get(`${APP_CONFIG_NAME}.stripeSecret`),
-      {
-        apiVersion: '2022-08-01',
-      },
-    );
+    this.stripe = new Stripe(this.config.get('STRIPE_SECRET'), {
+      apiVersion: '2023-10-16',
+    });
   }
 
   async createCustomer(companyId: string) {
