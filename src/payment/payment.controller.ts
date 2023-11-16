@@ -39,7 +39,7 @@ export class PaymentController {
 
   @Get('/block-trial')
   async checkCompanyTrial() {
-    return await this.paymentService.blockCompanyTrial();
+    return await this.paymentService.blockTrial();
   }
 
   @Get('/cron-job')

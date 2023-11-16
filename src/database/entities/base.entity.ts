@@ -5,7 +5,7 @@ export abstract class BaseEntity {
   @PrimaryKey({ type: UuidType })
   id: string = UuIdv4();
 
-  @Property({ fieldName: 'created_at' })
+  @Property({ fieldName: 'created_at', type: 'date' })
   createdAt: Date = new Date();
 
   @Property({ fieldName: 'updated_at', onUpdate: () => new Date() })

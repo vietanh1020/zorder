@@ -23,6 +23,11 @@ export class MenuService {
   ) {}
 
   async getMenu(companyId: string) {
+    let isBlock = await this.cacheManager.get('blocked:' + companyId);
+    if (!!isBlock)
+      throw new BadRequestException(
+        'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
+      );
     let menu = await this.cacheManager.get('menu_' + companyId);
 
     if (!menu) {

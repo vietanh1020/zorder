@@ -4,6 +4,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,6 +13,8 @@ import * as moment from 'moment';
 import { CardService } from './card.service';
 import { InvoiceDto } from './dto/create-payment.dto';
 import { StripeService } from './stripe.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class PaymentService {
@@ -28,6 +31,8 @@ export class PaymentService {
 
     @InjectRepository(Order)
     private readonly orderRepo: EntityRepository<Order>,
+
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
 
     private entityManager: EntityManager,
   ) {}
@@ -58,7 +63,7 @@ export class PaymentService {
 
   async createInvoice(invoice: InvoiceDto) {
     const { status, company } = invoice;
-    if (status === 'Failed') await this.blockAppDesktop(company);
+    if (status === 'Failed') await this.blockCompany(company);
     const data = this.invoiceRepo.create(invoice);
     await this.invoiceRepo.persistAndFlush(data);
   }
@@ -147,7 +152,7 @@ export class PaymentService {
         invoice.amount,
       );
       if (result.status === 'succeeded') {
-        await this.enableAppDesktop(invoice.companyId);
+        await this.enableCompany(invoice.companyId);
         return await this.updateReceipt(id);
       } else throw new InternalServerErrorException('Charge failed');
     } catch (error) {
@@ -156,31 +161,22 @@ export class PaymentService {
     }
   }
 
-  async blockAppDesktop(id: string) {
-    const company = await this.companyRepo.findOne({ id });
-    if (!company) throw new NotFoundException();
-    const update = this.companyRepo.assign(company, { blocked: true });
-    await this.companyRepo.persistAndFlush(update);
-    return update;
+  async blockCompany(id: string) {
+    this.cacheManager.set(`blocked:${id}`, true);
   }
 
-  async enableAppDesktop(id: string) {
-    const company = await this.companyRepo.findOne({ id });
-    if (!company) throw new NotFoundException();
-    const update = this.companyRepo.assign(company, { blocked: false });
-    await this.companyRepo.persistAndFlush(update);
-    return update;
+  async enableCompany(id: string) {
+    this.cacheManager.del(`blocked:${id}`);
   }
 
-  async blockCompanyTrial() {
-    const date = moment().subtract(14, 'days');
+  async blockTrial() {
+    const date = moment().subtract(14, 'days').toDate();
     const companies = await this.companyRepo.find({
-      // createAt: { $lt: date },
-      // start_pay: null,
+      createdAt: { $lt: date },
     });
 
     const blocks = companies.map(async ({ id }: Company) => {
-      return await this.blockAppDesktop(id);
+      return await this.blockCompany(id);
     });
 
     Promise.all(blocks);
@@ -193,7 +189,7 @@ export class PaymentService {
     if (!card) throw new BadRequestException('Please add card');
 
     try {
-      await this.enableAppDesktop(company);
+      await this.enableCompany(company);
       // return await this.companyRepo.findOneAndUpdate();
     } catch (error) {
       console.log('Error upgradePayVersion: ', error);

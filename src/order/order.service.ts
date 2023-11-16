@@ -4,11 +4,18 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { InjectQueue } from '@nestjs/bull';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Queue } from 'bull';
 import { Cache } from 'cache-manager';
 import { CreateOrderDto } from './dto';
 import { FunctionOrder } from './order.func';
+import { OrderStatus } from '@/types/order';
+import * as moment from 'moment';
 
 @Injectable()
 export class OrderService {
@@ -22,8 +29,43 @@ export class OrderService {
     private readonly functionOrder: FunctionOrder,
   ) {}
 
-  async getOrder(id: string) {
-    return await this.orderRepository.find({ id });
+  async companyGetOrder(companyId: string, status?: number, date?: Date) {
+    let isBlock = await this.cacheManager.get('blocked:' + companyId);
+    if (!!isBlock)
+      throw new BadRequestException(
+        'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
+      );
+
+    let query: any = {};
+
+    if (!!status) query.status = status;
+    if (!!date) {
+      query.createdAt = {
+        $gte: moment(date).startOf('date').toDate(),
+        $lt: moment(date).endOf('date').toDate(),
+      };
+    } else {
+      query.createdAt = {
+        $gte: moment().subtract(1, 'days').toDate(),
+        $lt: new Date(),
+      };
+    }
+
+    return await this.orderRepository.find({
+      companyId,
+      ...query,
+    });
+  }
+
+  async getOrderDetails(id: string, companyId: string) {
+    let isBlock = await this.cacheManager.get('blocked:' + companyId);
+    if (!!isBlock)
+      throw new BadRequestException(
+        'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
+      );
+
+    const order = await this.orderRepository.findOne({ id, companyId });
+    if (!order) throw new NotFoundException();
   }
 
   async createOrder(order: CreateOrderDto) {
