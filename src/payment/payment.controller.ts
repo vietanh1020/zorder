@@ -1,3 +1,6 @@
+import { JwtUser } from '@/common/decorators';
+import { OwnerGuard } from '@/common/guards';
+import { JwtDecoded } from '@/types';
 import {
   Body,
   Controller,
@@ -5,17 +8,13 @@ import {
   Param,
   Post,
   Put,
-  Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { IsAdminGuard } from 'src/guard/is-admin.guard';
-import { ApiSuccessResponse } from '../../share/api-response';
 import { CardService } from './card.service';
+import { CreateCardDto } from './dto/card.dto';
 import { PaymentService } from './payment.service';
 
-@Controller('api/v1/payment')
+@Controller('/payment')
 export class PaymentController {
   constructor(
     private cardService: CardService,
@@ -23,76 +22,52 @@ export class PaymentController {
   ) {}
 
   @Post('/card')
-  @UseGuards(IsAdminGuard)
-  async create(@Res() res: Response, @Req() { user }, @Body() body) {
-    return res.send(
-      ApiSuccessResponse.create(
-        await this.cardService.create({
-          email: user.email,
-          company: user.company,
-          ...body,
-        }),
-      ),
-    );
+  @UseGuards(OwnerGuard)
+  async create(@JwtUser() user: JwtDecoded, @Body() body: CreateCardDto) {
+    return await this.cardService.create({
+      email: user.email,
+      companyId: user.company_id,
+      ...body,
+    });
   }
 
   @Get('/invoice')
-  @UseGuards(IsAdminGuard)
-  async getInvoice(@Res() res: Response, @Req() { user }) {
-    return res.send(
-      ApiSuccessResponse.create(
-        await this.paymentService.getInvoices(user.company),
-      ),
-    );
+  @UseGuards(OwnerGuard)
+  async getInvoice(@JwtUser('company_id') company: string) {
+    return await this.paymentService.getInvoices(company);
   }
 
   @Get('/block-trial')
-  async checkCompanyTrial(@Res() res: Response) {
-    return res.send(
-      ApiSuccessResponse.create(await this.paymentService.blockCompanyTrial()),
-    );
+  async checkCompanyTrial() {
+    return await this.paymentService.blockCompanyTrial();
   }
 
   @Get('/cron-job')
-  async cronJob(@Res() res: Response) {
-    return res.send(
-      ApiSuccessResponse.create(await this.paymentService.jobCreateInvoice()),
-    );
+  async cronJob() {
+    return await this.paymentService.jobCreateInvoice();
   }
 
-  @UseGuards(IsAdminGuard)
+  @UseGuards(OwnerGuard)
   @Get('/cards')
-  async getListCard(@Res() res: Response, @Req() { user }) {
-    return res.send(
-      ApiSuccessResponse.create(
-        await this.cardService.getListCard(user.company),
-      ),
-    );
+  async getListCard(@JwtUser('company_id') company: string) {
+    return await this.cardService.getListCard(company);
   }
 
-  @UseGuards(IsAdminGuard)
+  @UseGuards(OwnerGuard)
   @Put('/:id')
-  async manualCharge(@Res() res: Response, @Param('id') id: string) {
-    return res.send(
-      ApiSuccessResponse.create(await this.paymentService.manualCharge(id)),
-    );
+  async manualCharge(@Param('id') id: string) {
+    return await this.paymentService.manualCharge(id);
   }
 
-  @UseGuards(IsAdminGuard)
+  @UseGuards(OwnerGuard)
   @Put('/version')
-  async upgradePayVersion(@Res() res: Response, @Req() { user }) {
-    return res.send(
-      ApiSuccessResponse.create(
-        await this.paymentService.upgradePayVersion(user.company),
-      ),
-    );
+  async upgradePayVersion(@JwtUser('company_id') company: string) {
+    return await this.paymentService.upgradePayVersion(company);
   }
 
-  @UseGuards(IsAdminGuard)
+  @UseGuards(OwnerGuard)
   @Get('/card/:id')
-  async getCard(@Res() res: Response, @Param('id') id: string) {
-    return res.send(
-      ApiSuccessResponse.create(await this.cardService.getCard(id)),
-    );
+  async getCard(@Param('id') id: string) {
+    return await this.cardService.getCard(id);
   }
 }

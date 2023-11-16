@@ -1,87 +1,81 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
+import { Company, Order } from '@/database/entities';
+import { Invoice } from '@/database/entities/invoice.entity';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as moment from 'moment';
-import { Model } from 'mongoose';
-import { Card } from 'src/schemas/Card.schema';
-import { Company } from 'src/schemas/Company.schema';
-import { Invoice } from 'src/schemas/Invoice.schema';
-import { UserTracking } from 'src/schemas/UserTracking.schema';
-import { ServerException } from 'src/share/exceptions/server.exception';
-import { InvoiceDto } from './dtos/payment.dto';
-import { StripeService } from './stripe.service';
-import { Config } from 'src/schemas/Config.schema';
 import { CardService } from './card.service';
+import { InvoiceDto } from './dto/create-payment.dto';
+import { StripeService } from './stripe.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     private stripeService: StripeService,
-    @InjectModel(Card.name)
-    private cardModel: Model<Card>,
 
-    @InjectModel(Company.name)
-    private companyModel: Model<Company>,
-
-    @InjectModel(UserTracking.name)
-    private userTrackingModel: Model<UserTracking>,
-
-    @InjectModel(Config.name)
-    private configModel: Model<Config>,
-
-    @InjectModel(Invoice.name)
-    private invoiceModel: Model<Invoice>,
-
-    private config: ConfigService,
     private cardService: CardService,
+
+    @InjectRepository(Company)
+    private readonly companyRepo: EntityRepository<Company>,
+
+    @InjectRepository(Invoice)
+    private readonly invoiceRepo: EntityRepository<Invoice>,
+
+    @InjectRepository(Order)
+    private readonly orderRepo: EntityRepository<Order>,
+
+    private entityManager: EntityManager,
   ) {}
 
   async getInvoices(company: string) {
-    return await this.invoiceModel.find({
-      company,
+    return await this.invoiceRepo.find({
+      companyId: company,
     });
   }
 
   async updateReceipt(id: string) {
-    const result = await this.invoiceModel
-      .findOneAndUpdate(
-        { _id: id },
-        { $set: { status: 'Success' } },
-        { useFindAndModify: false },
-      )
-      .exec();
-    if (result) {
-      const message = 'Payment successfully!';
-      return message;
-    } else {
-      throw new BadRequestException();
-    }
+    const receipt = await this.invoiceRepo.findOne(id);
+
+    if (!receipt) throw new NotFoundException();
+
+    const newReceipt = this.invoiceRepo.assign(receipt, { status: 'Success' });
+
+    await this.invoiceRepo.persistAndFlush(newReceipt);
+    return receipt;
   }
 
   async countReport(company: string, fromTime: string, toTime: string) {
-    return await this.userTrackingModel
-      .countDocuments({ company, date: { $gte: fromTime, $lte: toTime } })
-      .exec();
+    return await this.orderRepo.count({
+      companyId: company,
+      createdAt: { $gte: fromTime, $lte: toTime },
+    });
   }
 
   async createInvoice(invoice: InvoiceDto) {
     const { status, company } = invoice;
     if (status === 'Failed') await this.blockAppDesktop(company);
-    return await this.invoiceModel.create(invoice);
+    const data = this.invoiceRepo.create(invoice);
+    await this.invoiceRepo.persistAndFlush(data);
   }
 
   async jobCreateInvoice() {
     const prevMonth = moment().subtract(1, 'months');
     const fromDate = prevMonth.startOf('month').format('YYYY-MM-DD');
     const toDate = prevMonth.endOf('month').format('YYYY-MM-DD');
+    const pricing = 0.1; // 0.05$/request order
 
-    const companies = await this.companyModel.find();
+    const companies = await this.companyRepo.findAll();
 
     const receipts = await Promise.all(
       companies.map(async (company: Company) => {
-        const total = await this.countReport(company._id, fromDate, toDate);
-        const amount = total * 0.5;
-        return { company: company._id, total, amount };
+        const total = await this.countReport(company.id, fromDate, toDate);
+        const amount = total * pricing;
+        return { company: company.id, total, amount };
       }),
     );
 
@@ -89,11 +83,11 @@ export class PaymentService {
       receipts.map(async (item) => {
         const { company, total, amount } = item;
         if (amount >= 0.5) {
-          const card = await this.cardModel.findOne({ company });
+          const card = await this.cardService.getCardDefault(company);
 
-          const lastInvoice = await this.invoiceModel.findOne({
-            company,
-            from_date: fromDate,
+          const lastInvoice = await this.invoiceRepo.findOne({
+            companyId: company,
+            fromDate,
           });
 
           const invoice: InvoiceDto = {
@@ -135,57 +129,58 @@ export class PaymentService {
     return receipts;
   }
 
-  async manualCharge(_id: string) {
-    const invoice = await this.invoiceModel.findOne({ _id });
+  async manualCharge(id: string) {
+    const invoice = await this.invoiceRepo.findOne({ id });
     if (!invoice || invoice.status === 'Success')
       throw new BadRequestException('Invoice not found');
 
-    const card = await this.cardModel.findOne({ company: invoice.company });
+    const card = await this.cardService.getCardDefault(invoice.companyId);
     if (!card)
       throw new BadRequestException(
-        'Card not found! Please check card information',
+        'Card default not found! Please check card information',
       );
 
     try {
       const result = await this.stripeService.autoCharge(
         card.metadata.id,
         card.metadata.customer,
-        invoice.total,
+        invoice.amount,
       );
       if (result.status === 'succeeded') {
-        await this.enableAppDesktop(invoice.company);
-        return await this.updateReceipt(_id);
-      } else throw new ServerException('Charge failed');
+        await this.enableAppDesktop(invoice.companyId);
+        return await this.updateReceipt(id);
+      } else throw new InternalServerErrorException('Charge failed');
     } catch (error) {
-      throw new ServerException('Charge failed');
+      console.log(error);
+      throw new InternalServerErrorException('Charge failed');
     }
   }
 
-  async blockAppDesktop(company: string) {
-    return await this.configModel.findOneAndUpdate(
-      { company },
-      { $set: { is_block: true } },
-      { useFindAndModify: false },
-    );
+  async blockAppDesktop(id: string) {
+    const company = await this.companyRepo.findOne({ id });
+    if (!company) throw new NotFoundException();
+    const update = this.companyRepo.assign(company, { blocked: true });
+    await this.companyRepo.persistAndFlush(update);
+    return update;
   }
 
-  async enableAppDesktop(company: string) {
-    return await this.configModel.findOneAndUpdate(
-      { company },
-      { $set: { is_block: false } },
-      { useFindAndModify: false },
-    );
+  async enableAppDesktop(id: string) {
+    const company = await this.companyRepo.findOne({ id });
+    if (!company) throw new NotFoundException();
+    const update = this.companyRepo.assign(company, { blocked: false });
+    await this.companyRepo.persistAndFlush(update);
+    return update;
   }
 
   async blockCompanyTrial() {
-    const date = moment().subtract(14, 'days').toDate();
-    const companies = await this.companyModel.find({
-      create_at: { $lt: date },
-      start_pay: null,
+    const date = moment().subtract(14, 'days');
+    const companies = await this.companyRepo.find({
+      // createAt: { $lt: date },
+      // start_pay: null,
     });
 
-    const blocks = companies.map(async ({ _id }: Company) => {
-      return await this.blockAppDesktop(_id);
+    const blocks = companies.map(async ({ id }: Company) => {
+      return await this.blockAppDesktop(id);
     });
 
     Promise.all(blocks);
@@ -194,16 +189,12 @@ export class PaymentService {
   }
 
   async upgradePayVersion(company: string) {
-    const card = await this.cardService.getCardCompany(company);
+    const card = await this.cardService.getCardDefault(company);
     if (!card) throw new BadRequestException('Please add card');
 
     try {
       await this.enableAppDesktop(company);
-      return await this.companyModel.findOneAndUpdate(
-        { company, start_pay: null },
-        { $set: { start_pay: new Date() } },
-        { useFindAndModify: false },
-      );
+      // return await this.companyRepo.findOneAndUpdate();
     } catch (error) {
       console.log('Error upgradePayVersion: ', error);
     }
