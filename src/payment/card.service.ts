@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CreateCardDto } from './dto/card.dto';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { Card } from '@/database/entities';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { StripeService } from './stripe.service';
-import { CreateCardDto } from './dtos/card.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Card } from 'src/schemas/Card.schema';
-import { Model, isValidObjectId } from 'mongoose';
-import { BadRequestException } from 'src/share/exceptions/badrequest.exception';
 
 @Injectable()
 export class CardService {
@@ -13,30 +12,28 @@ export class CardService {
   thisYear = new Date().getFullYear();
 
   constructor(
-    // @InjectRedis()
-    // private redis: Redis,
-    @InjectModel(Card.name)
-    private cardModel: Model<Card>,
+    @InjectRepository(Card)
+    private readonly cardRepo: EntityRepository<Card>,
 
     private config: ConfigService,
     private stripeService: StripeService,
   ) {}
 
   async create(body: CreateCardDto) {
-    const { method, email, company, cardName, isDefault } = body;
+    const { method, email, companyId: companyId, cardName, isDefault } = body;
 
     try {
       const stripeCard = await this.stripeService.addMetadata(method, email);
 
-      const card = new this.cardModel({
+      const card = this.cardRepo.create({
         isDefault,
         cardName,
-        company,
+        companyId,
         email,
         metadata: stripeCard,
       });
 
-      await card.save();
+      await this.cardRepo.persistAndFlush(card);
 
       delete card.metadata.id;
       delete card.metadata.customer;
@@ -45,27 +42,17 @@ export class CardService {
     } catch (error) {
       throw new BadRequestException('Add card Error');
     }
-
-    // this.firstCreateHandle(companyId)
-    // this.natsService.emitUserAddCard({ companyId, userId })
   }
 
-  async getListCard(company: string) {
-    return await this.cardModel
-      .find({ company }, { 'metadata.id': 0, 'metadata.customer': 0 })
-      .exec();
+  async getListCard(companyId: string) {
+    return await this.cardRepo.find({ companyId });
   }
 
-  async getCardCompany(company: string) {
-    return await this.cardModel
-      .findOne({ company }, { 'metadata.id': 0, 'metadata.customer': 0 })
-      .exec();
+  async getCardDefault(companyId: string) {
+    return await this.cardRepo.findOne({ companyId, isDefault: true });
   }
 
   async getCard(id: string) {
-    if (!isValidObjectId(id)) throw new BadRequestException('Card invalid!');
-    return await this.cardModel
-      .findOne({ _id: id }, { 'metadata.id': 0, 'metadata.customer': 0 })
-      .exec();
+    return await this.cardRepo.findOne({ id });
   }
 }
