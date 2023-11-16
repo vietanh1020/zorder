@@ -59,6 +59,7 @@ export class UserService {
 
     const data: JwtDecoded = {
       id: user.id,
+      email: user.email,
       company_id: user.companyId,
       role: user.role,
     };
@@ -108,6 +109,7 @@ export class UserService {
 
     const tokenData = {
       id: createUser.id,
+      email: createUser.email,
       company_id: createUser.companyId,
       role: createUser.role,
     };

@@ -20,6 +20,9 @@ export class Order extends BaseEntity {
   @Property()
   note: string;
 
+  @Property({ type: 'number', default: 1 })
+  status: number;
+
   @Property({ type: 'json', nullable: true })
   foods: FoodOrder[];
 }

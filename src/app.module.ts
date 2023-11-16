@@ -14,6 +14,7 @@ import { MenuModule } from './menu/menu.module';
 import { OrderModule } from './order/order.module';
 import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { CompanyModule } from './company/company.module';
     UserModule,
     OrderModule,
     CompanyModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
