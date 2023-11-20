@@ -28,10 +28,10 @@ export class UserController {
     return res.send(user);
   }
 
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {
-    //
+  @Post('/google')
+  async googleAuth(@Req() req, @Body() body) {
+    const user = await this.userService.loginGoogle(body.token);
+    return user;
   }
 
   @Post('/login')
@@ -45,11 +45,5 @@ export class UserController {
     });
 
     return res.send(user);
-  }
-
-  @Get('google/redirect')
-  @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
-    return this.userService.googleLogin(req);
   }
 }

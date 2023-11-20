@@ -5,9 +5,10 @@ import { JwtService } from '@nestjs/jwt';
 import { GoogleStrategy } from './google.strategy';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Company, User])],
+  imports: [MikroOrmModule.forFeature([Company, User]), HttpModule],
   controllers: [UserController],
   providers: [UserService, GoogleStrategy, JwtService],
 })
