@@ -3,7 +3,7 @@ import { OwnerGuard } from '@/common/guards';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

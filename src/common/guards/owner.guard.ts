@@ -23,7 +23,6 @@ export class OwnerGuard implements CanActivate {
       req.user = this.jwtService.verify(accessToken, {
         secret: this.configService.get('JWT_ACCESS_KEY'),
       });
-      console.log(req.user);
       return true;
     } catch (err) {
       throw new UnauthorizedException();
