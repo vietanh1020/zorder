@@ -17,6 +17,7 @@ import { CompanyModule } from './company/company.module';
 import { PaymentModule } from './payment/payment.module';
 import { NotificationModule } from './notification/notification.module';
 import { UserModule } from './user/user.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { UserModule } from './user/user.module';
     PaymentModule,
     NotificationModule,
     UserModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
