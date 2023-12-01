@@ -15,8 +15,10 @@ export class UserService {
   ) {}
 
   async getUser(companyId: string) {
-    return await this.usersRepository.find({
+    const users = await this.usersRepository.find({
       companyId,
     });
+
+    return users.map((user) => delete user.password);
   }
 }
