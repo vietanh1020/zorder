@@ -10,7 +10,7 @@ export class AuthController {
   async createAdmin(@Body() adminDto: CreateAdminDto, @Response() res) {
     const user = await this.userService.createAdmin(adminDto);
 
-    res.cookie('access_token', user.accessToken, {
+    res.cookie('token', user.accessToken, {
       expires: new Date(new Date().getTime() + 30 * 1000 * 3600),
       sameSite: 'strict',
       httpOnly: true,
@@ -29,7 +29,7 @@ export class AuthController {
   async loginCredentials(@Body() loginDto: LoginDto, @Response() res) {
     const user = await this.userService.loginCredentials(loginDto);
 
-    res.cookie('access_token', user.accessToken, {
+    res.cookie('token', user.accessToken, {
       expires: new Date(new Date().getTime() + 30 * 1000 * 3600),
       sameSite: 'strict',
       httpOnly: true,
