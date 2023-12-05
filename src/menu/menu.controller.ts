@@ -6,16 +6,37 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FoodDto } from './dto';
 import { MenuService } from './menu.service';
-import { AuthGuard } from '@/common/guards';
+import { AuthGuard, OwnerGuard } from '@/common/guards';
 import { JwtUser } from '@/common/decorators';
+import { MinioService } from '@/minio/minio.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('/menu')
 export class MenuController {
-  constructor(private readonly menuService: MenuService) {}
+  constructor(
+    private readonly menuService: MenuService,
+    private readonly minioService: MinioService,
+  ) {}
+
+  @UseGuards(OwnerGuard)
+  @Post('/images')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBookCover(
+    @UploadedFile() file: Express.Multer.File,
+    @JwtUser('company_id') company: string,
+  ) {
+    const fileName = await this.minioService.uploadFile(
+      file,
+      'menu/' + company,
+    );
+    return fileName;
+  }
 
   @Get()
   @UseGuards(AuthGuard)

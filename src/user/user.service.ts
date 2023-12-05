@@ -19,6 +19,9 @@ export class UserService {
       companyId,
     });
 
-    return users.map((user) => delete user.password);
+    return users.map((user) => {
+      const { password, ...other } = user;
+      return other;
+    });
   }
 }
