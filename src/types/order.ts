@@ -6,11 +6,6 @@ type OptionDto = {
   }[];
 };
 
-export type FoodOrderDto = {
-  name: string;
-  options: OptionDto[];
-};
-
 export enum OrderStatus {
   pending = 1,
   inprogress = 2,

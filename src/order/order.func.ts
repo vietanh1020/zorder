@@ -1,3 +1,4 @@
+import { CreateOrderDto } from './dto/order.dto';
 import { Food, Order } from '@/database/entities';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
@@ -9,9 +10,9 @@ export class FunctionOrder {
     private entityManager: EntityManager,
   ) {}
 
-  createNewOrder = async (order, menu) => {
+  createNewOrder = async (order: CreateOrderDto, menu) => {
     const repository = this.entityManager.fork().getRepository(Order);
-    const { companyId, tableId, note } = order;
+    const { companyId, tableId } = order;
 
     let total = 0;
 
@@ -35,8 +36,11 @@ export class FunctionOrder {
           return result;
         });
 
+        price = price * foodBody.quantity;
+
         return {
           label: optionDB.label,
+          quantity: foodBody.quantity,
           data: detailOptionDb,
         };
       });
@@ -51,7 +55,6 @@ export class FunctionOrder {
 
     const createOrder = repository.create({
       total,
-      note,
       foods: foodReceipt,
       tableId,
       companyId,

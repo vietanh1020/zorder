@@ -4,6 +4,8 @@ import { Food } from './food.entity';
 
 type FoodOrder = {
   price: number;
+  quantity: number;
+  note: string;
   food: Food;
 };
 @Entity({ tableName: 'order' })
@@ -16,9 +18,6 @@ export class Order extends BaseEntity {
 
   @Property({ fieldName: 'total_money' })
   total: number;
-
-  @Property()
-  note: string;
 
   @Property({ type: 'number', default: 1 })
   status: number;

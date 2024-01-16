@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -33,6 +34,14 @@ export class FoodOrderDto {
   @IsNotEmpty()
   id: string;
 
+  @IsString()
+  note: string;
+
+  @IsNumber()
+  @Min(0)
+  @IsNotEmpty()
+  quantity: number;
+
   @ValidateNested()
   @IsArray()
   @Type(() => OptionDto)
@@ -43,9 +52,6 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   companyId: string;
-
-  @IsString()
-  note: string;
 
   @IsString()
   @IsNotEmpty()

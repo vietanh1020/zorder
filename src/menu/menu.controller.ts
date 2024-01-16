@@ -31,11 +31,15 @@ export class MenuController {
     @UploadedFile() file: Express.Multer.File,
     @JwtUser('company_id') company: string,
   ) {
-    const fileName = await this.minioService.uploadFile(
-      file,
-      'menu/' + company,
-    );
-    return fileName;
+    try {
+      const fileName = await this.minioService.uploadFile(
+        file,
+        '/menu/' + company,
+      );
+      return fileName;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @Get()
