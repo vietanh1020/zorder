@@ -60,13 +60,20 @@ export class MenuController {
 
   @Put(':id')
   @UseGuards(AuthGuard)
-  async updateFood(@Param('id') id: string, @Body() foodDto: FoodDto) {
-    return this.menuService.updateFood(id, foodDto);
+  async updateFood(
+    @Param('id') id: string,
+    @JwtUser('company_id') companyId: string,
+    @Body() foodDto: FoodDto,
+  ) {
+    return this.menuService.updateFood(id, companyId, foodDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  async deleteFood(@Param('id') id: string) {
-    return this.menuService.deleteFood(id);
+  async deleteFood(
+    @Param('id') id: string,
+    @JwtUser('company_id') companyId: string,
+  ) {
+    return this.menuService.deleteFood(id, companyId);
   }
 }

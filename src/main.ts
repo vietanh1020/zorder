@@ -8,9 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const cronService = app.get(CronjobService);
-  
-  cronService.startCronJob()
-  
+  cronService.startCronJob();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,12 +16,12 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     credentials: true,
   });
 
   app.use(cookieParser());
 
-  await app.listen(3000);
+  await app.listen(3003);
 }
 bootstrap();

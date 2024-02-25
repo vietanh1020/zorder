@@ -28,7 +28,7 @@ export class AuthService {
   ) {}
 
   async generateToken(data: JwtDecoded, type: TokenType) {
-    let expiresIn = '1h';
+    let expiresIn = '1d';
     let secret = this.configService.get('JWT_ACCESS_KEY');
 
     if (type === 'refreshToken') {
