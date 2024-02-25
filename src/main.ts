@@ -8,9 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const cronService = app.get(CronjobService);
-  
-  cronService.startCronJob()
-  
+  cronService.startCronJob();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

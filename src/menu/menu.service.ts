@@ -94,9 +94,9 @@ export class MenuService {
     };
   }
 
-  async updateFood(id: string, updateFood: FoodDto) {
+  async updateFood(id: string, companyId: string, updateFood: FoodDto) {
     const food = await this.foodRepository.findOne(
-      { id },
+      { id, companyId },
       { populate: ['options'] },
     );
 
@@ -130,10 +130,11 @@ export class MenuService {
     return food;
   }
 
-  async deleteFood(id: string) {
+  async deleteFood(id: string, companyId: string) {
     const food = await this.foodRepository.findOne(
       {
         id,
+        companyId,
       },
       { populate: ['options'] },
     );
