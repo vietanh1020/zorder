@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -21,13 +22,37 @@ export class OrderController {
     return await this.orderService.createOrder(order);
   }
 
+  @Put('/cancel/:id')
+  @UseGuards(AuthGuard)
+  async cancelOrder(
+    @Param('id') id: string,
+    @JwtUser('company_id') company: string,
+  ) {
+    return await this.orderService.cancelOrder(id, company);
+  }
+
+  @Put('/approve/:id')
+  @UseGuards(AuthGuard)
+  async approveOrder(
+    @Param('id') id: string,
+    @JwtUser('company_id') company: string,
+  ) {
+    return await this.orderService.approveOrder(id, company);
+  }
+
+  @Put('/end/:id')
+  @UseGuards(AuthGuard)
+  async end(@Param('id') id: string, @JwtUser('company_id') company: string) {
+    return await this.orderService.endOrder(id, company);
+  }
+
   @Get('')
   @UseGuards(AuthGuard)
   async companyGetOrder(
     @JwtUser('company_id') company_id: string,
     @Query() queries,
   ) {
-    const { status = '', date = '' } = queries;
+    const { status = 0, date = '' } = queries;
     return await this.orderService.companyGetOrder(company_id, +status, date);
   }
 

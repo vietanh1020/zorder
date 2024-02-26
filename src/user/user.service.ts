@@ -1,7 +1,7 @@
 import { User } from '@/database/entities';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
@@ -23,5 +23,21 @@ export class UserService {
       const { password, ...other } = user;
       return other;
     });
+  }
+
+  async removeStaff(userId: string, companyId: string) {
+    const user = await this.usersRepository.findOne({
+      id: userId,
+      companyId,
+    });
+
+    if (!user) throw new BadRequestException(['Staff not existed']);
+
+    if (user?.role === 'owner')
+      throw new BadRequestException(['Owner can not be deleted']);
+
+    await this.usersRepository.removeAndFlush(user);
+
+    return user.id;
   }
 }

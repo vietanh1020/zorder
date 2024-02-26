@@ -1,18 +1,18 @@
-import { CreateStaffDto } from './../auth/dto/users.dto';
 import { JwtUser } from '@/common/decorators';
 import { AuthGuard, OwnerGuard } from '@/common/guards';
+import { MinioService } from '@/minio/minio.service';
 import {
-  Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { MinioService } from '@/minio/minio.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UserService } from './user.service';
 
 @Controller('users')
 export class UserController {
@@ -25,6 +25,15 @@ export class UserController {
   @Get()
   async getUser(@JwtUser('company_id') company: string) {
     return await this.userService.getUser(company);
+  }
+
+  @UseGuards(OwnerGuard)
+  @Delete(':id')
+  async removeStaff(
+    @Param('id') id: string,
+    @JwtUser('company_id') company: string,
+  ) {
+    return await this.userService.removeStaff(id, company);
   }
 
   @UseGuards(AuthGuard)
@@ -41,8 +50,4 @@ export class UserController {
     );
     return fileName;
   }
-
-
- 
-
 }

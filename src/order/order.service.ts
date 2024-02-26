@@ -1,3 +1,4 @@
+import { Food } from './../database/entities/food.entity';
 import { Order } from '@/database/entities';
 import { MenuService } from '@/menu/menu.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -29,7 +30,7 @@ export class OrderService {
     private readonly functionOrder: FunctionOrder,
   ) {}
 
-  async companyGetOrder(companyId: string, status?: number, date?: Date) {
+  async companyGetOrder(companyId: string, status = 0, date = new Date()) {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
     if (!!isBlock)
       throw new BadRequestException(
@@ -46,7 +47,7 @@ export class OrderService {
       };
     } else {
       query.createdAt = {
-        $gte: moment().subtract(1, 'days').toDate(),
+        $gte: moment().startOf('date').toDate(),
         $lt: new Date(),
       };
     }
@@ -55,6 +56,47 @@ export class OrderService {
       companyId,
       ...query,
     });
+  }
+
+  async cancelOrder(id: string, companyId: string) {
+    const order = await this.orderRepository.findOne({ id, companyId });
+
+    if (!order) throw new NotFoundException(`Order with not found`);
+    if (order.status === 2)
+      throw new BadRequestException(
+        'Order đã kết thúc không thể chuyển trạng thái',
+      );
+
+    this.orderRepository.assign(order, { status: -1 });
+
+    await this.orderRepository.persistAndFlush(order);
+    return order;
+  }
+
+  async approveOrder(id: string, companyId: string) {
+    const order = await this.orderRepository.findOne({ id, companyId });
+
+    if (!order) throw new NotFoundException(`Order with not found`);
+    if (order.status === 2)
+      throw new BadRequestException(
+        'Order đã kết thúc không thể chuyển trạng thái',
+      );
+
+    this.orderRepository.assign(order, { status: 1 });
+
+    await this.orderRepository.persistAndFlush(order);
+    return order;
+  }
+
+  async endOrder(id: string, companyId: string) {
+    const order = await this.orderRepository.findOne({ id, companyId });
+
+    if (!order) throw new NotFoundException(`Order with not found`);
+
+    this.orderRepository.assign(order, { status: 2 });
+
+    await this.orderRepository.persistAndFlush(order);
+    return order;
   }
 
   async getOrderDetails(id: string, companyId: string) {

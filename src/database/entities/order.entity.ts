@@ -19,8 +19,8 @@ export class Order extends BaseEntity {
   @Property({ fieldName: 'total_money' })
   total: number;
 
-  @Property({ type: 'number', default: 1 })
-  status: number;
+  @Property({ type: 'number', default: 0 })
+  status: number; // 0: pending, 1: dong y,  -1: cancel, 2: success
 
   @Property({ type: 'json', nullable: true })
   foods: FoodOrder[];
