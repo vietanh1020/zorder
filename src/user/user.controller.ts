@@ -1,6 +1,8 @@
+import { CreateStaffDto } from './../auth/dto/users.dto';
 import { JwtUser } from '@/common/decorators';
 import { AuthGuard, OwnerGuard } from '@/common/guards';
 import {
+  Body,
   Controller,
   Get,
   Post,
@@ -39,4 +41,8 @@ export class UserController {
     );
     return fileName;
   }
+
+
+ 
+
 }

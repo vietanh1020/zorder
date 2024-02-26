@@ -1,4 +1,5 @@
 import { Company, User } from '@/database/entities';
+import { JwtDecoded, TokenType } from '@/types';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import {
@@ -6,14 +7,12 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { CreateAdminDto, LoginDto } from './dto';
-import { JwtDecoded, TokenType } from '@/types';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
+import * as bcrypt from 'bcrypt';
 import { error } from 'console';
-import { HttpService } from '@nestjs/axios';
+import { CreateAdminDto, CreateStaffDto, LoginDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -148,5 +147,27 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async inviteStaff(staffDto: CreateStaffDto, companyId: string) {
+
+    await this.checkUserNotExist(staffDto.email);
+
+    // hash password
+    const salt = bcrypt.genSaltSync(10);
+    const hashed = bcrypt.hashSync(staffDto.password, salt);
+
+    // Create user
+    const createUser = this.usersRepository.create({
+      ...staffDto,
+      role: 'staff',
+      password: hashed,
+      companyId,
+    });
+    await this.usersRepository.persistAndFlush(createUser);
+
+    delete createUser.password;
+
+    return createUser
   }
 }
