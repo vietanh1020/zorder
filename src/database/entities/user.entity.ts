@@ -20,6 +20,9 @@ export class User extends BaseEntity {
   @Property()
   phone: string;
 
+  @Property()
+  avatar: string;
+
   @Property({ fieldName: 'company_id' })
   companyId: string;
 

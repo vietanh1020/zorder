@@ -22,6 +22,12 @@ export class UserController {
   ) {}
 
   @UseGuards(OwnerGuard)
+  @Get('/profile')
+  async getProfile(@JwtUser('id') userId: string) {
+    return await this.userService.getProfile(userId);
+  }
+
+  @UseGuards(OwnerGuard)
   @Get()
   async getUser(@JwtUser('company_id') company: string) {
     return await this.userService.getUser(company);

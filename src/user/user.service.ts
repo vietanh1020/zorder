@@ -25,6 +25,17 @@ export class UserService {
     });
   }
 
+  async getProfile(userId: string) {
+    const user = await this.usersRepository.findOne({
+      id: userId,
+    });
+
+    if (!user) throw new BadRequestException(['User not existed']);
+
+    delete user.password;
+    return user;
+  }
+
   async removeStaff(userId: string, companyId: string) {
     const user = await this.usersRepository.findOne({
       id: userId,
