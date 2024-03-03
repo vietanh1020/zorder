@@ -1,11 +1,19 @@
-import { Body, Controller, Post, Req, Response } from '@nestjs/common';
+import { AuthGuard } from '@/common/guards';
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  Response,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateAdminDto, CreateStaffDto, LoginDto } from './dto';
 import { AuthService } from './auth.service';
 import { JwtUser } from '@/common/decorators';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('/admin')
   async createAdmin(@Body() adminDto: CreateAdminDto, @Response() res) {
@@ -27,11 +35,13 @@ export class AuthController {
   }
 
   @Post('/staff')
-  async inviteStaff(@Body() staffDto: CreateStaffDto,
-    @JwtUser('company_id') company: string
+  @UseGuards(AuthGuard)
+  async inviteStaff(
+    @Body() staffDto: CreateStaffDto,
+    @JwtUser('company_id') company: string,
   ) {
     const data = await this.authService.inviteStaff(staffDto, company);
-    return data
+    return data;
   }
 
   @Post('/login')

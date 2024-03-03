@@ -150,7 +150,6 @@ export class AuthService {
   }
 
   async inviteStaff(staffDto: CreateStaffDto, companyId: string) {
-
     await this.checkUserNotExist(staffDto.email);
 
     // hash password
@@ -164,10 +163,13 @@ export class AuthService {
       password: hashed,
       companyId,
     });
+
+    console.log(createUser);
+
     await this.usersRepository.persistAndFlush(createUser);
 
     delete createUser.password;
 
-    return createUser
+    return createUser;
   }
 }

@@ -603,15 +603,14 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "status": {
-          "name": "status",
-          "type": "int",
+        "note": {
+          "name": "note",
+          "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "1",
-          "mappedType": "integer"
+          "mappedType": "string"
         },
         "status": {
           "name": "status",

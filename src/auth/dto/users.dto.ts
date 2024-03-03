@@ -25,6 +25,9 @@ export class CreateAdminDto {
   lastName: string;
 
   @IsString()
+  avatar: string;
+
+  @IsString()
   @IsNotEmpty()
   address: string;
 
@@ -60,6 +63,9 @@ export class CreateStaffDto {
   lastName: string;
 
   @IsString()
+  avatar: string;
+
+  @IsString()
   @IsNotEmpty()
   address: string;
 
@@ -75,4 +81,3 @@ export class CreateStaffDto {
   })
   password: string;
 }
-
