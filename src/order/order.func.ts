@@ -36,8 +36,6 @@ export class FunctionOrder {
           return result;
         });
 
-        price = price * foodBody.quantity;
-
         return {
           label: optionDB.label,
           quantity: foodBody.quantity,
@@ -45,10 +43,10 @@ export class FunctionOrder {
         };
       });
 
-      total += price;
+      total += price * foodBody.quantity;
 
       return {
-        price,
+        price: price * foodBody.quantity,
         food: { ...foodDB, options: FoodReceiptOption },
       };
     });
