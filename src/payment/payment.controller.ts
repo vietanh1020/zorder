@@ -48,7 +48,7 @@ export class PaymentController {
   }
 
   @UseGuards(OwnerGuard)
-  @Get('/cards')
+  @Get('/card')
   async getListCard(@JwtUser('company_id') company: string) {
     return await this.cardService.getListCard(company);
   }
