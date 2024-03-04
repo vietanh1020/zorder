@@ -364,6 +364,15 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "is_multiple": {
+          "name": "is_multiple",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        },
         "data": {
           "name": "data",
           "type": "jsonb",

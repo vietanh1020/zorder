@@ -10,6 +10,9 @@ export class FoodOption extends BaseEntity {
   @Property()
   label: string;
 
+  @Property()
+  isMultiple: boolean;
+
   @Property({ type: 'json', nullable: true })
   data: { label: string; price: number }[];
 

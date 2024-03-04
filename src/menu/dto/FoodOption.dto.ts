@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -21,6 +22,10 @@ export class CreateFoodOptionDto {
   @IsString()
   @IsNotEmpty()
   label: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isMultiple: boolean;
 
   @ValidateNested()
   @IsArray()
