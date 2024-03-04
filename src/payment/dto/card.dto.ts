@@ -26,6 +26,7 @@ export class CreateCardDto {
   isDefault: boolean;
 
   @IsString()
+  @IsOptional()
   email: string;
 
   @IsString()

@@ -40,6 +40,7 @@ export class CardService {
 
       return card;
     } catch (error) {
+      console.log(error);
       throw new BadRequestException('Add card Error');
     }
   }
