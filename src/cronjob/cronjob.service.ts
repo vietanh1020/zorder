@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import axios from 'axios';
 import * as cron from 'node-cron';
 
 @Injectable()
@@ -7,11 +8,22 @@ export class CronjobService {
 
   // Schedule a cron job to run every minute
   startCronJob(): void {
-    cron.schedule('* * * * *', () => {
-      console.log("RUN RUNNNNNNN")
+    cron.schedule('*/10 * * * *', async () => {
+      // 10 min/ 1 LAN
+      const { data } = await axios.get(
+        'http://localhost:3003/payment/cron-job',
+      );
 
-      this.logger.debug('Cron job is running...');
-      // Add your logic here, e.g., call a function or perform a task
+      this.logger.debug('GET FEE USED', data);
+    });
+
+    cron.schedule('0 0 * * *', async () => {
+      // 1 DAY / 1 LAN
+      const { data } = await axios.get(
+        'http://localhost:3003/payment/block-trial',
+      );
+
+      this.logger.debug('BLOCK COMPANY TRIAL', data);
     });
   }
 }
