@@ -1,4 +1,4 @@
-import { Company, User } from '@/database/entities';
+import { Company, Device, User } from '@/database/entities';
 import { JwtDecoded, TokenType } from '@/types';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
@@ -12,7 +12,12 @@ import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { error } from 'console';
-import { CreateAdminDto, CreateStaffDto, LoginDto } from './dto';
+import {
+  CreateAdminDto,
+  CreateStaffDto,
+  DeviceTokenDto,
+  LoginDto,
+} from './dto';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +28,8 @@ export class AuthService {
     private readonly usersRepository: EntityRepository<User>,
     @InjectRepository(Company)
     private readonly companyRepository: EntityRepository<Company>,
+    @InjectRepository(Device)
+    private readonly deviceRepository: EntityRepository<Device>,
     private entityManager: EntityManager,
   ) {}
 
@@ -39,6 +46,22 @@ export class AuthService {
       secret,
       expiresIn,
     });
+  }
+
+  async saveDeviceToken(
+    data: DeviceTokenDto,
+    companyId: string,
+    userId: string,
+  ) {
+    const device = this.deviceRepository.create({
+      token: data.token,
+      companyId,
+      userId,
+    });
+
+    await this.deviceRepository.persistAndFlush(device);
+
+    return device;
   }
 
   async getDataUser(user: User) {

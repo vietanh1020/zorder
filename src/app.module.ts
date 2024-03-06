@@ -59,7 +59,7 @@ import { CronjobModule } from './cronjob/cronjob.module';
     OrderModule,
     CompanyModule,
     PaymentModule,
-    NotificationModule,
+    // NotificationModule,
     UserModule,
     CronjobModule,
   ],

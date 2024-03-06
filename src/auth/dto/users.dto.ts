@@ -49,6 +49,12 @@ export class CreateAdminDto {
   company: CompanyDto;
 }
 
+export class DeviceTokenDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+}
+
 export class CreateStaffDto {
   @IsEmail()
   @IsNotEmpty()

@@ -1,3 +1,4 @@
+import { NotificationService } from './../notification/notification.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -23,6 +24,7 @@ import { OrderProcessor } from './order.processor';
     OrderProcessor,
     JwtService,
     FunctionOrder,
+    NotificationService,
   ],
 })
 export class OrderModule {}

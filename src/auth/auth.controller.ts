@@ -7,7 +7,12 @@ import {
   Response,
   UseGuards,
 } from '@nestjs/common';
-import { CreateAdminDto, CreateStaffDto, LoginDto } from './dto';
+import {
+  CreateAdminDto,
+  CreateStaffDto,
+  DeviceTokenDto,
+  LoginDto,
+} from './dto';
 import { AuthService } from './auth.service';
 import { JwtUser } from '@/common/decorators';
 
@@ -41,6 +46,21 @@ export class AuthController {
     @JwtUser('company_id') company: string,
   ) {
     const data = await this.authService.inviteStaff(staffDto, company);
+    return data;
+  }
+
+  @Post('/device')
+  @UseGuards(AuthGuard)
+  async deviceToken(
+    @Body() deviceDto: DeviceTokenDto,
+    @JwtUser('company_id') company: string,
+    @JwtUser('id') userId: string,
+  ) {
+    const data = await this.authService.saveDeviceToken(
+      deviceDto,
+      company,
+      userId,
+    );
     return data;
   }
 
