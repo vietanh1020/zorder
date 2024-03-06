@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/order.dto';
 import { Food, Order } from '@/database/entities';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -19,6 +20,7 @@ export class FunctionOrder {
     const foodReceipt = order.foods.map((foodBody) => {
       let price = 0;
       const foodDB: Food = menu.find((food: Food) => food.id === foodBody.id);
+      if (!foodDB) throw new BadRequestException('Món ăn không tồn tại');
       price += foodDB.price;
 
       const FoodReceiptOption = foodBody.options.map((optionsBody) => {

@@ -8,7 +8,7 @@ export class CronjobService {
 
   // Schedule a cron job to run every minute
   startCronJob(): void {
-    cron.schedule('*/10 * * * *', async () => {
+    cron.schedule('* * * * *', async () => {
       // 10 min/ 1 LAN
       const { data } = await axios.get(
         'http://localhost:3003/payment/cron-job',

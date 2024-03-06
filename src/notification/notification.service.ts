@@ -17,12 +17,16 @@ export class NotificationService {
     return this.firebaseAdmin;
   }
 
-  async sendNotify(deviceToken: string, message: string): Promise<void> {
+  async sendNotify(
+    deviceToken: string,
+    message: string,
+    title: string,
+  ): Promise<void> {
     const firebaseAdmin = this.getFirebaseAdmin();
 
     const msg: any = {
       notification: {
-        title: 'Notification Title',
+        title,
         body: message,
       },
       token: deviceToken,

@@ -9,6 +9,10 @@ export class NotificationController {
   async updateFood() {
     const token =
       'deLQqeU5Izfi82frcpeEKw:APA91bErz3Z3fNam_Jt9QlvqWlgnTYBNGgE31AjV_wd7RIxApQ1MbAX0aNM5q4Ly9HN5zxAFj7NLp1P3-kbLFqbQfEKFkMth6BgxymSq2df7uDF-2szBU5KSxKLH1cRSbsY1vDqmQU2j';
-    return this.notificationService.sendNotify(token, 'test');
+    return this.notificationService.sendNotify(
+      token,
+      'order',
+      'company have order',
+    );
   }
 }
