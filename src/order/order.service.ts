@@ -1,4 +1,3 @@
-import { Food } from './../database/entities/food.entity';
 import { Order } from '@/database/entities';
 import { MenuService } from '@/menu/menu.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
@@ -13,10 +12,10 @@ import {
 } from '@nestjs/common';
 import { Queue } from 'bull';
 import { Cache } from 'cache-manager';
+import * as moment from 'moment';
 import { CreateOrderDto } from './dto';
 import { FunctionOrder } from './order.func';
-import { OrderStatus } from '@/types/order';
-import * as moment from 'moment';
+import { EntityManager } from '@mikro-orm/core';
 
 @Injectable()
 export class OrderService {
@@ -28,6 +27,7 @@ export class OrderService {
     private readonly orderRepository: EntityRepository<Order>,
     private readonly menuService: MenuService,
     private readonly functionOrder: FunctionOrder,
+    private readonly em: EntityManager,
   ) {}
 
   async companyGetOrder(companyId: string, status = 0, date = new Date()) {
@@ -112,11 +112,7 @@ export class OrderService {
 
   async createOrder(order: CreateOrderDto) {
     const { companyId } = order;
-    let menu: any = await this.cacheManager.get('menu_' + companyId);
-    if (!menu) {
-      menu = await this.menuService.getMenu(companyId);
-    }
-
+    const menu: any = await this.menuService.getMenu(companyId);
     try {
       const job = await this.orderQueue.add('create', { order, menu });
       return job.finished();
@@ -125,5 +121,119 @@ export class OrderService {
     }
 
     return await this.functionOrder.createNewOrder(order, menu);
+  }
+
+  // get statistics trong sl order trong thang
+  async getDailyReport(companyId: string): Promise<any[]> {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const rawQuery = `
+      SELECT DATE(o.created_at), SUM(o.total_money) , count(*)
+      FROM
+        "order" o
+      WHERE
+        EXTRACT(YEAR FROM o.created_at) = ? AND
+        EXTRACT(MONTH FROM o.created_at) = ? AND
+        o.company_id = ?
+      GROUP BY 
+        DATE(o.created_at)
+    `;
+
+    const order = await this.em
+      .getConnection()
+      .execute(rawQuery, [year, month, companyId]);
+
+    return order;
+  }
+
+  async getMonthlyFoodReport(companyId: string): Promise<any[]> {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    const menu: any = await this.menuService.getMenu(companyId);
+
+    if (menu?.length === 0) return menu;
+
+    const rawQuery = `SELECT o.foods
+    FROM "order" o 
+    WHERE  o.company_id = ? AND 
+      EXTRACT(MONTH FROM o.created_at) = ? AND
+      EXTRACT(YEAR FROM o.created_at) = ?
+    `;
+
+    const statistic: any = {};
+    menu.forEach((element) => {
+      const { name } = element;
+      statistic[element.id] = { name, count: 0 };
+    });
+
+    const orders = await this.em
+      .getConnection()
+      .execute(rawQuery, [companyId, month, year]);
+
+    const foodInOder = orders
+      .map(({ foods }) => {
+        return foods;
+      })
+      .flat();
+
+    foodInOder.map(({ food, quantity }) => {
+      return (statistic[food.id].count += quantity);
+    });
+
+    return statistic;
+  }
+
+  async getDailyFoodReport(date: string, companyId: string): Promise<any[]> {
+    const day = date || moment().format('YYYY-MM-DD');
+
+    const menu: any = await this.menuService.getMenu(companyId);
+
+    if (menu?.length === 0) return menu;
+
+    const rawQuery = `SELECT o.foods FROM "order" o WHERE  o.company_id = ? AND DATE(o.created_at) = ? `;
+
+    const statistic: any = {};
+    menu.forEach((element) => {
+      const { name } = element;
+      statistic[element.id] = { name, count: 0 };
+    });
+
+    const orders = await this.em
+      .getConnection()
+      .execute(rawQuery, [companyId, day]);
+
+    const foodInOder = orders
+      .map(({ foods }) => {
+        return foods;
+      })
+      .flat();
+
+    foodInOder.map(({ food, quantity }) => {
+      return (statistic[food.id].count += quantity);
+    });
+
+    return statistic;
+  }
+
+  async getMonthReport(companyId: string): Promise<any[]> {
+    const now = new Date();
+    const year = now.getFullYear();
+
+    const rawQuery = `
+      SELECT EXTRACT(MONTH FROM o.created_at), SUM(o.total_money) , count(*)
+      FROM
+        "order" o
+      WHERE
+        EXTRACT(YEAR FROM o.created_at) = ? AND
+        o.company_id = ?
+      GROUP BY 
+        EXTRACT(MONTH FROM o.created_at)
+    `;
+
+    return this.em.getConnection().execute(rawQuery, [year, companyId]);
   }
 }

@@ -40,7 +40,7 @@ export class FunctionOrder {
 
         return {
           label: optionDB.label,
-          quantity: foodBody.quantity,
+
           data: detailOptionDb,
         };
       });
@@ -49,6 +49,7 @@ export class FunctionOrder {
 
       return {
         price: price * foodBody.quantity,
+        quantity: foodBody.quantity,
         food: { ...foodDB, options: FoodReceiptOption },
       };
     });

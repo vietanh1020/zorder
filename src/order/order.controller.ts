@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto';
 import { OrderService } from './order.service';
-import { AuthGuard } from '@/common/guards';
+import { AuthGuard, OwnerGuard } from '@/common/guards';
 import { JwtUser } from '@/common/decorators';
 
 @Controller('/order')
@@ -54,6 +54,37 @@ export class OrderController {
   ) {
     const { status = 0, date = '' } = queries;
     return await this.orderService.companyGetOrder(company_id, +status, date);
+  }
+
+  @Get('/month/statistics')
+  @UseGuards(OwnerGuard)
+  async statistics(
+    @JwtUser('company_id') company_id: string,
+    @Query() queries,
+  ) {
+    return await this.orderService.getDailyReport(company_id);
+  }
+
+  @Get('/monthly/food/statistics')
+  @UseGuards(OwnerGuard)
+  async monthyFood(
+    @JwtUser('company_id') company_id: string,
+    @Query() queries,
+  ) {
+    return await this.orderService.getMonthlyFoodReport(company_id);
+  }
+
+  @Get('/daily/food/statistics')
+  @UseGuards(OwnerGuard)
+  async dailyFood(@JwtUser('company_id') company_id: string, @Query() queries) {
+    const { date = '' } = queries;
+    return await this.orderService.getDailyFoodReport(date, company_id);
+  }
+
+  @Get('/year/statistics')
+  @UseGuards(OwnerGuard)
+  async yearStatistics(@JwtUser('company_id') company_id: string) {
+    return await this.orderService.getMonthReport(company_id);
   }
 
   @Get(':id')
