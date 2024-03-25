@@ -31,6 +31,16 @@ export class OrderController {
     return await this.orderService.cancelOrder(id, company);
   }
 
+  @Put('/status/:id')
+  @UseGuards(AuthGuard)
+  async change(
+    @Param('id') id: string,
+    @Body() { status = 1 }: any,
+    @JwtUser('company_id') company: string,
+  ) {
+    return await this.orderService.updateStatusFood(id, company, status);
+  }
+
   @Put('/approve/:id')
   @UseGuards(AuthGuard)
   async approveOrder(

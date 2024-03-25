@@ -7,3 +7,4 @@ export * from './order.entity';
 export * from './invoice.entity';
 export * from './card.entity';
 export * from './device.entity';
+export * from './order_detail.entity';

@@ -1,4 +1,4 @@
-import { Order } from '@/database/entities';
+import { Order, OrderDetail } from '@/database/entities';
 import { MenuService } from '@/menu/menu.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -25,6 +25,8 @@ export class OrderService {
 
     @InjectRepository(Order)
     private readonly orderRepository: EntityRepository<Order>,
+    @InjectRepository(OrderDetail)
+    private readonly detailRepo: EntityRepository<OrderDetail>,
     private readonly menuService: MenuService,
     private readonly functionOrder: FunctionOrder,
     private readonly em: EntityManager,
@@ -52,10 +54,21 @@ export class OrderService {
       };
     }
 
-    return await this.orderRepository.find({
+    const data = await this.orderRepository.find({
       companyId,
       ...query,
     });
+
+    const detailList = data.map(async (item) => {
+      const details = await this.detailRepo.find({ orderId: item.id });
+
+      return {
+        ...item,
+        details,
+      };
+    });
+
+    return await Promise.all(detailList);
   }
 
   async cancelOrder(id: string, companyId: string) {
@@ -85,6 +98,14 @@ export class OrderService {
     this.orderRepository.assign(order, { status: 1 });
 
     await this.orderRepository.persistAndFlush(order);
+    return order;
+  }
+
+  async updateStatusFood(id: string, companyId: string, status: number) {
+    const order = await this.detailRepo.findOne({ id, companyId });
+    if (!order) throw new NotFoundException(`Order with not found`);
+    this.detailRepo.assign(order, { status });
+    await this.detailRepo.persistAndFlush(order);
     return order;
   }
 
@@ -123,7 +144,7 @@ export class OrderService {
     return await this.functionOrder.createNewOrder(order, menu);
   }
 
-  // get statistics trong sl order trong thang
+  // get statistics sl order trong thang
   async getDailyReport(companyId: string): Promise<any[]> {
     const now = new Date();
     const year = now.getFullYear();
