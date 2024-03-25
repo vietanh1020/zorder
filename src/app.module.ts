@@ -15,7 +15,6 @@ import { OrderModule } from './order/order.module';
 import { AuthModule } from './auth/auth.module';
 import { CompanyModule } from './company/company.module';
 import { PaymentModule } from './payment/payment.module';
-import { NotificationModule } from './notification/notification.module';
 import { UserModule } from './user/user.module';
 import { CronjobModule } from './cronjob/cronjob.module';
 
@@ -59,7 +58,6 @@ import { CronjobModule } from './cronjob/cronjob.module';
     OrderModule,
     CompanyModule,
     PaymentModule,
-    // NotificationModule,
     UserModule,
     CronjobModule,
   ],

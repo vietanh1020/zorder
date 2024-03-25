@@ -16,6 +16,7 @@ import * as moment from 'moment';
 import { CreateOrderDto } from './dto';
 import { FunctionOrder } from './order.func';
 import { EntityManager } from '@mikro-orm/core';
+import { NotificationService } from '@/notification/notification.service';
 
 @Injectable()
 export class OrderService {
@@ -25,7 +26,9 @@ export class OrderService {
 
     @InjectRepository(Order)
     private readonly orderRepository: EntityRepository<Order>,
+
     private readonly menuService: MenuService,
+    private readonly notiService: NotificationService,
     private readonly functionOrder: FunctionOrder,
     private readonly em: EntityManager,
   ) {}
@@ -113,14 +116,16 @@ export class OrderService {
   async createOrder(order: CreateOrderDto) {
     const { companyId } = order;
     const menu: any = await this.menuService.getMenu(companyId);
-    try {
-      const job = await this.orderQueue.add('create', { order, menu });
-      return job.finished();
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   const job = await this.orderQueue.add('create', { order, menu });
+    //   return job.finished();
+    // } catch (error) {
+    //   console.log(error);
+    // }
 
-    return await this.functionOrder.createNewOrder(order, menu);
+    await this.functionOrder.createNewOrder(order, menu);
+    await this.notiService.sendNotify(order.companyId);
+    return true;
   }
 
   // get statistics trong sl order trong thang

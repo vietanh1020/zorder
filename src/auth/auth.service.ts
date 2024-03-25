@@ -53,6 +53,11 @@ export class AuthService {
     companyId: string,
     userId: string,
   ) {
+    const token = await this.deviceRepository.findOne({
+      token: data.token,
+    });
+    if (token) return true;
+
     const device = this.deviceRepository.create({
       token: data.token,
       companyId,
