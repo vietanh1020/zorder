@@ -1,4 +1,4 @@
-import { NotificationService } from './../notification/notification.service';
+import { NotificationService } from '@/notification/notification.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,7 +12,7 @@ import { OrderProcessor } from './order.processor';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Order, Food, FoodOption, OrderDetail]),
+    MikroOrmModule.forFeature([Device, Order, Food, FoodOption, OrderDetail]),
     BullModule.registerQueue({
       name: 'order',
     }),
@@ -21,10 +21,10 @@ import { OrderProcessor } from './order.processor';
   providers: [
     OrderService,
     MenuService,
+    NotificationService,
     OrderProcessor,
     JwtService,
     FunctionOrder,
-    NotificationService,
   ],
 })
 export class OrderModule {}

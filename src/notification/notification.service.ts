@@ -1,3 +1,6 @@
+import { Device } from '@/database/entities';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
@@ -7,7 +10,10 @@ const serviceAccount = require('../../serviceAccount.json');
 export class NotificationService {
   private readonly firebaseAdmin: admin.app.App;
 
-  constructor() {
+  constructor(
+    @InjectRepository(Device)
+    private readonly deviceRepo: EntityRepository<Device>,
+  ) {
     this.firebaseAdmin = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
@@ -17,24 +23,24 @@ export class NotificationService {
     return this.firebaseAdmin;
   }
 
-  async sendNotify(
-    deviceToken: string,
-    message: string,
-    title: string,
-  ): Promise<void> {
+  async sendNotify(companyId: string): Promise<void> {
     const firebaseAdmin = this.getFirebaseAdmin();
 
-    const msg: any = {
-      notification: {
-        title,
-        body: message,
-      },
-      token: deviceToken,
-    };
-
     try {
-      await firebaseAdmin.messaging().send(msg);
-      return msg;
+      const users = await this.deviceRepo.find({
+        companyId,
+      });
+
+      for (let user of users) {
+        const msg: any = {
+          notification: {
+            title: 'Zorder',
+            body: 'You have new Order',
+          },
+          token: user.token,
+        };
+        await firebaseAdmin.messaging().send(msg);
+      }
     } catch (error) {
       console.error(error);
     }
