@@ -8,18 +8,13 @@ services:
   #     context: .
   #     dockerfile: Dockerfile
   #   ports:
-  #     - ${APP_PORT}:${APP_PORT}
+  #     - 3003:3003
   #   volumes:
   #     - .:/app
   #     - /app/dist
   #     - /app/node_modules
   #   networks:
   #     - lumyri-network
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1.0'
-  #         memory: 1024M
 
   postgres:
     image: postgres:14.4-alpine
@@ -45,16 +40,16 @@ services:
     networks:
       - lumyri-network
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis-commander
-    restart: unless-stopped
-    environment:
-      - REDIS_HOSTS=redis
-    ports:
-      - ${REDIS_COMMAND_PORT:-8081}:8081
-    networks:
-      - lumyri-network
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: redis-commander
+  #   restart: unless-stopped
+  #   environment:
+  #     - REDIS_HOSTS=redis
+  #   ports:
+  #     - ${REDIS_COMMAND_PORT:-8081}:8081
+  #   networks:
+  #     - lumyri-network
 
   minio:
     image: minio/minio:RELEASE.2022-10-08T20-11-00Z
