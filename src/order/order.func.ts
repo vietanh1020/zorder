@@ -37,7 +37,7 @@ export class FunctionOrder {
   createNewOrder = async (order: CreateOrderDto, menu) => {
     const orderRepo = this.entityManager.fork().getRepository(Order);
 
-    const { companyId, tableId } = order;
+    const { companyId, tableId, deviceToken } = order;
 
     let total = 0;
 
@@ -86,6 +86,7 @@ export class FunctionOrder {
         foods: foodReceipt,
         tableId,
         companyId,
+        deviceToken,
       });
 
       await orderRepo.persistAndFlush(createOrder);
