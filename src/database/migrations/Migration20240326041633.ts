@@ -1,19 +1,23 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20240304014409 extends Migration {
+export class Migration20240326041633 extends Migration {
 
   async up(): Promise<void> {
     this.addSql('create table "card" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "card_name" varchar(255) not null, "email" varchar(255) not null, "metadata" jsonb not null, "is_default" boolean not null default true, constraint "card_pkey" primary key ("id"));');
 
     this.addSql('create table "company" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "name" varchar(255) not null, "description" varchar(255) not null, "image" varchar(255) not null, "address" varchar(255) not null, constraint "company_pkey" primary key ("id"));');
 
+    this.addSql('create table "device" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "token" varchar(255) not null, "user_id" varchar(255) not null, constraint "device_pkey" primary key ("id"));');
+
     this.addSql('create table "food" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "name" varchar(255) not null, "image" varchar(255) not null, "description" varchar(255) not null, "price" int not null, constraint "food_pkey" primary key ("id"));');
 
-    this.addSql('create table "food_options" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "food_id" uuid null, "label" varchar(255) not null, "data" jsonb null, constraint "food_options_pkey" primary key ("id"));');
+    this.addSql('create table "food_options" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "food_id" uuid null, "label" varchar(255) not null, "is_multiple" boolean not null, "data" jsonb null, constraint "food_options_pkey" primary key ("id"));');
 
     this.addSql('create table "invoice" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "status" varchar(255) not null, "image" varchar(255) not null, "from_date" varchar(255) not null, "to_date" varchar(255) not null, "method" varchar(255) not null default \'Card\', "amount" int not null, "details" varchar(255) not null, constraint "invoice_pkey" primary key ("id"));');
 
-    this.addSql('create table "order" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "table_id" varchar(255) not null, "total_money" int not null, "status" int not null default 0, "foods" jsonb null, constraint "order_pkey" primary key ("id"));');
+    this.addSql('create table "order" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "table_id" varchar(255) not null, "total_money" int not null, "status" int not null default 0, "foods" jsonb null, "device_token" varchar(255) null, constraint "order_pkey" primary key ("id"));');
+
+    this.addSql('create table "order_detail" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "company_id" varchar(255) not null, "order_id" varchar(255) not null, "detail" jsonb not null, "status" int not null default 0, constraint "order_detail_pkey" primary key ("id"));');
 
     this.addSql('create table "user" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "email" varchar(255) not null, "first_name" varchar(255) not null, "last_name" varchar(255) not null, "address" varchar(255) not null, "phone" varchar(255) not null, "avatar" varchar(255) not null, "company_id" uuid null, "password" varchar(255) not null, "role" varchar(255) not null, constraint "user_pkey" primary key ("id"));');
 
@@ -31,6 +35,8 @@ export class Migration20240304014409 extends Migration {
 
     this.addSql('drop table if exists "company" cascade;');
 
+    this.addSql('drop table if exists "device" cascade;');
+
     this.addSql('drop table if exists "food" cascade;');
 
     this.addSql('drop table if exists "food_options" cascade;');
@@ -38,6 +44,8 @@ export class Migration20240304014409 extends Migration {
     this.addSql('drop table if exists "invoice" cascade;');
 
     this.addSql('drop table if exists "order" cascade;');
+
+    this.addSql('drop table if exists "order_detail" cascade;');
 
     this.addSql('drop table if exists "user" cascade;');
   }

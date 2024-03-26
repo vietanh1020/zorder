@@ -35,10 +35,15 @@ export class OrderController {
   @UseGuards(AuthGuard)
   async change(
     @Param('id') id: string,
-    @Body() { status = 1 }: any,
+    @Body() { status = 1, device }: any,
     @JwtUser('company_id') company: string,
   ) {
-    return await this.orderService.updateStatusFood(id, company, status);
+    return await this.orderService.updateStatusFood(
+      id,
+      company,
+      status,
+      device,
+    );
   }
 
   @Put('/approve/:id')

@@ -45,4 +45,21 @@ export class NotificationService {
       console.error(error);
     }
   }
+
+  async sendNotiCustomer(token: string): Promise<void> {
+    const firebaseAdmin = this.getFirebaseAdmin();
+
+    try {
+      const msg: any = {
+        notification: {
+          title: 'Zorder',
+          body: 'You have new update status',
+        },
+        token: token,
+      };
+      await firebaseAdmin.messaging().send(msg);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }

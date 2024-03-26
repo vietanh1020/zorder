@@ -100,15 +100,24 @@ export class OrderService {
     this.orderRepository.assign(order, { status: 1 });
 
     await this.orderRepository.persistAndFlush(order);
+
     return order;
   }
 
-  async updateStatusFood(id: string, companyId: string, status: number) {
-    const order = await this.detailRepo.findOne({ id, companyId });
-    if (!order) throw new NotFoundException(`Order with not found`);
-    this.detailRepo.assign(order, { status });
-    await this.detailRepo.persistAndFlush(order);
-    return order;
+  async updateStatusFood(
+    id: string,
+    companyId: string,
+    status: number,
+    deviceToken: string,
+  ) {
+    const orderDetail = await this.detailRepo.findOne({ id, companyId });
+    if (!orderDetail) throw new NotFoundException(`Order Detail  not found`);
+
+    if (!orderDetail) throw new NotFoundException(`Order not found`);
+    this.detailRepo.assign(orderDetail, { status });
+    await this.detailRepo.persistAndFlush(orderDetail);
+    await this.notiService.sendNotiCustomer(deviceToken);
+    return orderDetail;
   }
 
   async endOrder(id: string, companyId: string) {

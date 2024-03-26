@@ -24,4 +24,7 @@ export class Order extends BaseEntity {
 
   @Property({ type: 'json', nullable: true })
   foods: FoodOrder[];
+
+  @Property({ fieldName: 'device_token', nullable: true })
+  deviceToken: string;
 }

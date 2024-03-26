@@ -61,4 +61,8 @@ export class CreateOrderDto {
   @IsArray()
   @Type(() => FoodOrderDto)
   foods: FoodOrderDto[];
+
+  @IsString()
+  @IsNotEmpty()
+  deviceToken: string;
 }
