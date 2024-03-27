@@ -102,6 +102,11 @@ export class OrderController {
     return await this.orderService.getMonthReport(company_id);
   }
 
+  @Get('/customer/:id')
+  async customerGetOrder(@Param('id') id: string) {
+    return await this.orderService.customerGetOrder(id);
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard)
   async userGetOrder(

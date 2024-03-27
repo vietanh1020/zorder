@@ -111,7 +111,6 @@ export class OrderService {
     deviceToken: string,
   ) {
     const orderDetail = await this.detailRepo.findOne({ id, companyId });
-    if (!orderDetail) throw new NotFoundException(`Order Detail  not found`);
 
     if (!orderDetail) throw new NotFoundException(`Order not found`);
     this.detailRepo.assign(orderDetail, { status });
@@ -140,6 +139,13 @@ export class OrderService {
 
     const order = await this.orderRepository.findOne({ id, companyId });
     if (!order) throw new NotFoundException();
+    return order;
+  }
+
+  async customerGetOrder(ids: string) {
+    const idArr = ids.split('+');
+    const order = await this.orderRepository.find({ id: { $in: idArr } });
+    return order;
   }
 
   async createOrder(order: CreateOrderDto) {
@@ -152,9 +158,8 @@ export class OrderService {
     //   console.log(error);
     // }
 
-    await this.functionOrder.createNewOrder(order, menu);
     await this.notiService.sendNotify(order.companyId);
-    return true;
+    return await this.functionOrder.createNewOrder(order, menu);
   }
 
   // get statistics sl order trong thang
