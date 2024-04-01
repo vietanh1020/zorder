@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -44,13 +45,19 @@ export class MenuController {
 
   @Get()
   @UseGuards(AuthGuard)
-  async adminGetMenu(@JwtUser('company_id') companyId: string) {
-    return this.menuService.getMenu(companyId);
+  async adminGetMenu(
+    @JwtUser('company_id') companyId: string,
+    @Query('search') search: string,
+  ) {
+    return this.menuService.getMenu(companyId, search);
   }
 
   @Get(':id')
-  async getMenu(@Param('id') companyId: string) {
-    return this.menuService.getMenu(companyId);
+  async getMenu(
+    @Param('id') companyId: string,
+    @Query('search') search: string,
+  ) {
+    return this.menuService.getMenu(companyId, search);
   }
 
   @Post()

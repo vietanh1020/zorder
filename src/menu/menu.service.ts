@@ -22,13 +22,13 @@ export class MenuService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async getMenu(companyId: string) {
+  async getMenu(companyId: string, search = '') {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
     if (!!isBlock)
       throw new BadRequestException(
         'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
       );
-    let menu = await this.cacheManager.get('menu_' + companyId);
+    let menu: any = await this.cacheManager.get('menu_' + companyId);
 
     if (!menu) {
       menu = await this.foodRepository.find(
@@ -39,7 +39,11 @@ export class MenuService {
       await this.cacheManager.set('menu_' + companyId, menu);
     }
 
-    return menu;
+    const newMenu: any = menu.filter((item) => {
+      return item.name.toLowerCase().includes(search.toLowerCase());
+    });
+
+    return newMenu;
   }
 
   async createFood(food: FoodDto, companyId: string) {
