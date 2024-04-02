@@ -17,13 +17,13 @@ export class CronjobService {
       this.logger.debug('GET FEE USED', data);
     });
 
-    cron.schedule('0 0 * * *', async () => {
-      // 1 DAY / 1 LAN
-      const { data } = await axios.get(
-        'http://localhost:3003/payment/block-trial',
-      );
+    // cron.schedule('0 0 * * *', async () => {
+    //   // 1 DAY / 1 LAN
+    //   const { data } = await axios.get(
+    //     'http://localhost:3003/payment/block-trial',
+    //   );
 
-      this.logger.debug('BLOCK COMPANY TRIAL', data);
-    });
+    //   this.logger.debug('BLOCK COMPANY TRIAL', data);
+    // });
   }
 }
