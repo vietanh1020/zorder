@@ -137,8 +137,7 @@ export class OrderService {
         'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
       );
 
-    const order = await this.orderRepository.findOne({ id, companyId });
-    if (!order) throw new NotFoundException();
+    const order = await this.detailRepo.find({ orderId: id });
     return order;
   }
 
