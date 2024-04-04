@@ -143,8 +143,9 @@ export class OrderService {
 
   async customerGetOrder(ids: string) {
     const idArr = ids.split('+');
-    const order = await this.orderRepository.find({ id: { $in: idArr } });
-    return order;
+    const detail = await this.detailRepo.find({ orderId: { $in: idArr } });
+
+    return detail.sort();
   }
 
   async createOrder(order: CreateOrderDto) {
