@@ -17,6 +17,7 @@ import { CompanyModule } from './company/company.module';
 import { PaymentModule } from './payment/payment.module';
 import { UserModule } from './user/user.module';
 import { CronjobModule } from './cronjob/cronjob.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { CronjobModule } from './cronjob/cronjob.module';
     PaymentModule,
     UserModule,
     CronjobModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
