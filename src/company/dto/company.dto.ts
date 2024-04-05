@@ -15,4 +15,16 @@ export class CompanyDto {
 
   @IsString()
   description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  openAt: string;
+
+  @IsString()
+  @IsNotEmpty()
+  closeAt: string;
+
+  @IsString()
+  @IsNotEmpty()
+  openDay: string;
 }

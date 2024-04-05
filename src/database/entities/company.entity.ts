@@ -14,4 +14,13 @@ export class Company extends BaseEntity {
 
   @Property()
   address: string;
+
+  @Property()
+  openAt: string;
+
+  @Property()
+  closeAt: string;
+
+  @Property()
+  openDay: string;
 }

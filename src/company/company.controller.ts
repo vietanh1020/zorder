@@ -5,6 +5,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Put,
   UploadedFile,
@@ -26,6 +27,11 @@ export class CompanyController {
   @UseGuards(AuthGuard)
   @Get()
   async getCompany(@JwtUser('company_id') companyId: string) {
+    return this.companyService.getCompany(companyId);
+  }
+
+  @Get(':id')
+  async getCompanyDetail(@Param('id') companyId: string) {
     return this.companyService.getCompany(companyId);
   }
 
