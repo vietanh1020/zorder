@@ -56,8 +56,9 @@ export class MenuController {
   async getMenu(
     @Param('id') companyId: string,
     @Query('search') search: string,
+    @Query('tableId') tableId: string,
   ) {
-    return this.menuService.getMenu(companyId, search);
+    return this.menuService.userGetMenu(companyId, search);
   }
 
   @Post()
