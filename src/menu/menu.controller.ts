@@ -17,6 +17,7 @@ import { AuthGuard, OwnerGuard } from '@/common/guards';
 import { JwtUser } from '@/common/decorators';
 import { MinioService } from '@/minio/minio.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CategoryDto } from '@/category/dto/category.dto';
 
 @Controller('/menu')
 export class MenuController {
@@ -59,6 +60,21 @@ export class MenuController {
     @Query('tableId') tableId: string,
   ) {
     return this.menuService.userGetMenu(companyId, search);
+  }
+
+  @Post('/category')
+  @UseGuards(AuthGuard)
+  async createCategory(
+    @Body() categoryDto: CategoryDto,
+    @JwtUser('company_id') companyId: string,
+  ) {
+    return this.menuService.createCategory(categoryDto, companyId);
+  }
+
+  @Get('/category')
+  @UseGuards(AuthGuard)
+  async getCategory(@JwtUser('company_id') companyId: string) {
+    return this.menuService.getCategory(companyId);
   }
 
   @Post()

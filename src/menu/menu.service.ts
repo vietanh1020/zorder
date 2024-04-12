@@ -10,17 +10,27 @@ import {
 import { FoodDto } from './dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { CategoryDto } from '@/category/dto/category.dto';
+import { Category } from '@/database/entities/category.entity';
 
 @Injectable()
 export class MenuService {
   constructor(
     @InjectRepository(Food)
     private readonly foodRepository: EntityRepository<Food>,
+
+    @InjectRepository(Category)
+    private readonly cateRepo: EntityRepository<Category>,
+
     @InjectRepository(FoodOption)
     private readonly optionRepository: EntityRepository<FoodOption>,
     private entityManager: EntityManager,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  async getCategory(companyId: string) {
+    return await this.cateRepo.find({ companyId });
+  }
 
   async getMenu(companyId: string, search = '') {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
@@ -43,7 +53,15 @@ export class MenuService {
       return item.name.toLowerCase().includes(search.toLowerCase());
     });
 
-    return newMenu;
+    const groupedFoods = newMenu.reduce((acc, food) => {
+      if (!acc[food.category]) {
+        acc[food.category] = [];
+      }
+      acc[food.category].push(food);
+      return acc;
+    }, {});
+
+    return groupedFoods;
   }
 
   async userGetMenu(companyId: string, search = '') {
@@ -67,7 +85,15 @@ export class MenuService {
       return item.name.toLowerCase().includes(search.toLowerCase());
     });
 
-    return newMenu;
+    const groupedFoods = newMenu.reduce((acc, food) => {
+      if (!acc[food.category]) {
+        acc[food.category] = [];
+      }
+      acc[food.category].push(food);
+      return acc;
+    }, {});
+
+    return groupedFoods;
   }
 
   async createFood(food: FoodDto, companyId: string) {
@@ -122,6 +148,28 @@ export class MenuService {
     };
   }
 
+  async createCategory(category: CategoryDto, companyId: string) {
+    const { name } = category;
+
+    const menu: Category = await this.cateRepo.findOne({
+      name,
+      companyId,
+    });
+
+    if (menu) {
+      throw new BadRequestException(['Category name already existed']);
+    }
+
+    const createFood = this.cateRepo.create({
+      ...category,
+      companyId,
+    });
+
+    await this.cateRepo.persistAndFlush(createFood);
+
+    return;
+  }
+
   async updateFood(id: string, companyId: string, updateFood: FoodDto) {
     const food = await this.foodRepository.findOne(
       { id, companyId },
@@ -136,22 +184,22 @@ export class MenuService {
 
     await this.foodRepository.persistAndFlush(food);
 
-    for (const option of food.options) {
-      await this.optionRepository.removeAndFlush(option);
-    }
+    // for (const option of food.options) {
+    //   await this.optionRepository.removeAndFlush(option);
+    // }
 
-    for (const option of updateFood.foodOption) {
-      try {
-        const createOption = this.optionRepository.create({
-          ...option,
-          foodId: food.id,
-        });
+    // for (const option of updateFood.foodOption) {
+    //   try {
+    //     const createOption = this.optionRepository.create({
+    //       ...option,
+    //       foodId: food.id,
+    //     });
 
-        await this.optionRepository.persistAndFlush(createOption);
-      } catch (error) {
-        throw new BadRequestException('Error create option ' + option.label);
-      }
-    }
+    //     await this.optionRepository.persistAndFlush(createOption);
+    //   } catch (error) {
+    //     throw new BadRequestException('Error create option ' + option.label);
+    //   }
+    // }
 
     await this.cacheManager.del('menu_' + food.companyId);
 

@@ -22,6 +22,14 @@ export class FoodDto {
   price: number;
 
   @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  priceOrigin: number;
+
+  @IsString()
   description: string;
 
   @ValidateNested()
