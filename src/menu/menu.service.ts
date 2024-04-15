@@ -7,7 +7,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FoodDto } from './dto';
+import { FoodDto, FoodUpdateDto } from './dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CategoryDto } from '@/category/dto/category.dto';
@@ -143,11 +143,8 @@ export class MenuService {
     };
   }
 
-  async updateFood(id: string, companyId: string, updateFood: FoodDto) {
-    const food = await this.foodRepository.findOne(
-      { id, companyId },
-      { populate: ['options'] },
-    );
+  async updateFood(id: string, companyId: string, updateFood: FoodUpdateDto) {
+    const food = await this.foodRepository.findOne({ id, companyId });
 
     if (!food) {
       throw new NotFoundException(`Food with ID ${id} not found`);

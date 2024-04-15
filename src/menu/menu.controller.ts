@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FoodDto } from './dto';
+import { FoodDto, FoodUpdateDto } from './dto';
 import { MenuService } from './menu.service';
 import { AuthGuard, OwnerGuard } from '@/common/guards';
 import { JwtUser } from '@/common/decorators';
@@ -76,7 +76,7 @@ export class MenuController {
   async updateFood(
     @Param('id') id: string,
     @JwtUser('company_id') companyId: string,
-    @Body() foodDto: FoodDto,
+    @Body() foodDto: FoodUpdateDto,
   ) {
     return this.menuService.updateFood(id, companyId, foodDto);
   }
