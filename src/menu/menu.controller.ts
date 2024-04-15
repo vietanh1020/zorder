@@ -62,21 +62,6 @@ export class MenuController {
     return this.menuService.userGetMenu(companyId, search);
   }
 
-  @Post('/category')
-  @UseGuards(AuthGuard)
-  async createCategory(
-    @Body() categoryDto: CategoryDto,
-    @JwtUser('company_id') companyId: string,
-  ) {
-    return this.menuService.createCategory(categoryDto, companyId);
-  }
-
-  @Get('/category')
-  @UseGuards(AuthGuard)
-  async getCategory(@JwtUser('company_id') companyId: string) {
-    return this.menuService.getCategory(companyId);
-  }
-
   @Post()
   @UseGuards(AuthGuard)
   async createFood(

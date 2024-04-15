@@ -27,10 +27,6 @@ export class MenuService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async getCategory(companyId: string) {
-    return await this.cateRepo.find({ companyId });
-  }
-
   async getMenu(companyId: string, search = '') {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
     if (!!isBlock)
@@ -145,28 +141,6 @@ export class MenuService {
       ...createFood,
       listOption: ListCreateOption,
     };
-  }
-
-  async createCategory(category: CategoryDto, companyId: string) {
-    const { name } = category;
-
-    const menu: Category = await this.cateRepo.findOne({
-      name,
-      companyId,
-    });
-
-    if (menu) {
-      throw new BadRequestException(['Category name already existed']);
-    }
-
-    const createFood = this.cateRepo.create({
-      ...category,
-      companyId,
-    });
-
-    await this.cateRepo.persistAndFlush(createFood);
-
-    return;
   }
 
   async updateFood(id: string, companyId: string, updateFood: FoodDto) {

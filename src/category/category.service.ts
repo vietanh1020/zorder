@@ -1,25 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Category } from '@/database/entities';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/postgresql';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CategoryDto } from './dto/category.dto';
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    @InjectRepository(Category)
+    private readonly cateRepo: EntityRepository<Category>,
+  ) {}
+
+  async getCategory(companyId: string) {
+    return await this.cateRepo.find({ companyId });
   }
 
-  findAll() {
-    return `This action returns all category`;
-  }
+  async createCategory(category: CategoryDto, companyId: string) {
+    const { name } = category;
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
-  }
+    const menu: Category = await this.cateRepo.findOne({
+      name,
+      companyId,
+    });
 
-  update(id: number, updateCategoryDto: any) {
-    return `This action updates a #${id} category`;
-  }
+    if (menu) {
+      throw new BadRequestException(['Category name already existed']);
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+    const createFood = this.cateRepo.create({
+      ...category,
+      companyId,
+    });
+
+    await this.cateRepo.persistAndFlush(createFood);
+
+    return;
   }
 }

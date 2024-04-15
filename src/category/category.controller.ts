@@ -6,39 +6,29 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CategoryDto } from './dto/category.dto';
+import { AuthGuard } from '@/common/guards';
+import { JwtUser } from '@/common/decorators';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  create(@Body() createCategoryDto: CategoryDto) {
-    return this.categoryService.create(createCategoryDto);
+  @UseGuards(AuthGuard)
+  async createCategory(
+    @Body() categoryDto: CategoryDto,
+    @JwtUser('company_id') companyId: string,
+  ) {
+    return this.categoryService.createCategory(categoryDto, companyId);
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
-  }
-
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateCategoryDto: UpdateCategoryDto,
-  // ) {
-  //   return this.categoryService.update(+id, updateCategoryDto);
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  @UseGuards(AuthGuard)
+  async getCategory(@JwtUser('company_id') companyId: string) {
+    return this.categoryService.getCategory(companyId);
   }
 }
