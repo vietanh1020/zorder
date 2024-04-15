@@ -180,7 +180,7 @@ export class OrderService {
 
   async createOrder(order: CreateOrderDto) {
     const { companyId } = order;
-    const menu: any = await this.menuService.getMenu(companyId);
+    const menu: any = await this.menuService.getAllFood(companyId);
     // try {
     //   const job = await this.orderQueue.add('create', { order, menu });
     //   return job.finished();
@@ -222,7 +222,7 @@ export class OrderService {
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
 
-    const menu: any = await this.menuService.getMenu(companyId);
+    const menu: any = await this.menuService.getAllFood(companyId);
 
     if (menu?.length === 0) return menu;
 
@@ -259,7 +259,7 @@ export class OrderService {
   async getDailyFoodReport(date: string, companyId: string): Promise<any[]> {
     const day = date || moment().format('YYYY-MM-DD');
 
-    const menu: any = await this.menuService.getMenu(companyId);
+    const menu: any = await this.menuService.getAllFood(companyId);
 
     if (menu?.length === 0) return menu;
 

@@ -59,6 +59,22 @@ export class MenuService {
     return groupedFoods;
   }
 
+  async getAllFood(companyId: string, search = '') {
+    let menu: any = await this.cacheManager.get('all_food_' + companyId);
+
+    if (!menu) {
+      menu = await this.foodRepository.find({ companyId });
+
+      await this.cacheManager.set('all_food_' + companyId, menu);
+    }
+
+    const newMenu: any = menu.filter((item) => {
+      return item.name.toLowerCase().includes(search.toLowerCase());
+    });
+
+    return newMenu;
+  }
+
   async userGetMenu(companyId: string, search = '') {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
     if (!!isBlock)
