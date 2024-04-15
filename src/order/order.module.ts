@@ -3,6 +3,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
+  Category,
   Device,
   Food,
   FoodOption,
@@ -18,7 +19,14 @@ import { OrderProcessor } from './order.processor';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([Device, Order, Food, FoodOption, OrderDetail]),
+    MikroOrmModule.forFeature([
+      Device,
+      Order,
+      Food,
+      FoodOption,
+      OrderDetail,
+      Category,
+    ]),
     BullModule.registerQueue({
       name: 'order',
     }),

@@ -1,4 +1,4 @@
-import { Food, FoodOption } from '@/database/entities';
+import { Category, Food, FoodOption } from '@/database/entities';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import {
@@ -11,7 +11,6 @@ import { FoodDto } from './dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CategoryDto } from '@/category/dto/category.dto';
-import { Category } from '@/database/entities/category.entity';
 
 @Injectable()
 export class MenuService {
