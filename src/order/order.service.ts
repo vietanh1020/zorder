@@ -34,7 +34,12 @@ export class OrderService {
     private readonly em: EntityManager,
   ) {}
 
-  async companyGetOrder(companyId: string, status = 0, date = new Date()) {
+  async companyGetOrder(
+    companyId: string,
+    status = 0,
+    date = new Date(),
+    tableId = '',
+  ) {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
     if (!!isBlock)
       throw new BadRequestException(
@@ -44,6 +49,9 @@ export class OrderService {
     let query: any = {};
 
     if (!!status) query.status = status;
+
+    if (!!tableId) query.tableId = tableId;
+
     if (!!date) {
       query.createdAt = {
         $gte: moment(date).startOf('date').toDate(),
@@ -130,6 +138,28 @@ export class OrderService {
     return order;
   }
 
+  async endTable(tableId: string) {
+    let query: any = {};
+    const date = new Date();
+    query.createdAt = {
+      $gte: moment(date).startOf('date').toDate(),
+      $lt: moment(date).endOf('date').toDate(),
+    };
+
+    const orders = await this.orderRepository.find({
+      tableId,
+      ...query,
+      status: 0,
+    });
+
+    for (let order of orders) {
+      this.orderRepository.assign(order, { status: 2 });
+      await this.orderRepository.persistAndFlush(order);
+    }
+
+    return orders.map((orders) => orders.id);
+  }
+
   async getOrderDetails(id: string, companyId: string) {
     let isBlock = await this.cacheManager.get('blocked:' + companyId);
     if (!!isBlock)
@@ -150,7 +180,7 @@ export class OrderService {
 
   async createOrder(order: CreateOrderDto) {
     const { companyId } = order;
-    const menu: any = await this.menuService.getMenu(companyId);
+    const menu: any = await this.menuService.getAllFood(companyId);
     // try {
     //   const job = await this.orderQueue.add('create', { order, menu });
     //   return job.finished();
@@ -192,7 +222,7 @@ export class OrderService {
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
 
-    const menu: any = await this.menuService.getMenu(companyId);
+    const menu: any = await this.menuService.getAllFood(companyId);
 
     if (menu?.length === 0) return menu;
 
@@ -229,7 +259,7 @@ export class OrderService {
   async getDailyFoodReport(date: string, companyId: string): Promise<any[]> {
     const day = date || moment().format('YYYY-MM-DD');
 
-    const menu: any = await this.menuService.getMenu(companyId);
+    const menu: any = await this.menuService.getAllFood(companyId);
 
     if (menu?.length === 0) return menu;
 

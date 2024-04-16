@@ -17,7 +17,13 @@ export class Food extends BaseEntity {
   description: string;
 
   @Property()
+  category: string;
+
+  @Property()
   price: number;
+
+  @Property()
+  priceOrigin: number;
 
   @OneToMany(() => FoodOption, (option) => option.food, {
     cascade: [Cascade.REMOVE],

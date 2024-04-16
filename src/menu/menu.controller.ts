@@ -11,12 +11,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FoodDto } from './dto';
+import { FoodDto, FoodUpdateDto } from './dto';
 import { MenuService } from './menu.service';
 import { AuthGuard, OwnerGuard } from '@/common/guards';
 import { JwtUser } from '@/common/decorators';
 import { MinioService } from '@/minio/minio.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CategoryDto } from '@/category/dto/category.dto';
 
 @Controller('/menu')
 export class MenuController {
@@ -56,8 +57,9 @@ export class MenuController {
   async getMenu(
     @Param('id') companyId: string,
     @Query('search') search: string,
+    @Query('tableId') tableId: string,
   ) {
-    return this.menuService.getMenu(companyId, search);
+    return this.menuService.userGetMenu(companyId, search);
   }
 
   @Post()
@@ -74,7 +76,7 @@ export class MenuController {
   async updateFood(
     @Param('id') id: string,
     @JwtUser('company_id') companyId: string,
-    @Body() foodDto: FoodDto,
+    @Body() foodDto: FoodUpdateDto,
   ) {
     return this.menuService.updateFood(id, companyId, foodDto);
   }

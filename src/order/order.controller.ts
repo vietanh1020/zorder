@@ -67,8 +67,13 @@ export class OrderController {
     @JwtUser('company_id') company_id: string,
     @Query() queries,
   ) {
-    const { status = 0, date = '' } = queries;
-    return await this.orderService.companyGetOrder(company_id, +status, date);
+    const { status = 0, date = '', tableId } = queries;
+    return await this.orderService.companyGetOrder(
+      company_id,
+      +status,
+      date,
+      tableId,
+    );
   }
 
   @Get('/month/statistics')

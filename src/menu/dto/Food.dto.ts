@@ -22,10 +22,43 @@ export class FoodDto {
   price: number;
 
   @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  priceOrigin: number;
+
+  @IsString()
   description: string;
 
   @ValidateNested()
   @IsArray()
   @Type(() => CreateFoodOptionDto)
   foodOption: CreateFoodOptionDto[];
+}
+
+export class FoodUpdateDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  // @IsString()
+  // @IsNotEmpty()
+  // image: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  price: number;
+
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  priceOrigin: number;
+
+  @IsString()
+  description: string;
 }
