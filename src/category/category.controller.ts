@@ -31,4 +31,9 @@ export class CategoryController {
   async getCategory(@JwtUser('company_id') companyId: string) {
     return this.categoryService.getCategory(companyId);
   }
+
+  @Get(':id')
+  async userGetCategory(@Param('id') companyId: string) {
+    return this.categoryService.getCategory(companyId);
+  }
 }
