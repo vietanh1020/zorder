@@ -10,6 +10,9 @@ export class OrderDetail extends BaseEntity {
   @Property()
   orderId?: string;
 
+  @Property()
+  customerName?: string;
+
   @Property({ type: 'json', nullable: false })
   detail: any;
 

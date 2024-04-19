@@ -18,6 +18,7 @@ export class FunctionOrder {
   ) {}
 
   saveOrderDetail = async (
+    customerName: string,
     companyId: string,
     orderId: string,
     detail: string,
@@ -25,6 +26,7 @@ export class FunctionOrder {
     const detailRepo = this.entityManager.fork().getRepository(OrderDetail);
 
     const createDetail = detailRepo.create({
+      customerName,
       detail,
       companyId,
       orderId,
@@ -93,6 +95,7 @@ export class FunctionOrder {
 
       for (const food of createOrder.foods) {
         await this.saveOrderDetail(
+          createOrder.customerName,
           companyId,
           createOrder.id,
           JSON.stringify(food.food),

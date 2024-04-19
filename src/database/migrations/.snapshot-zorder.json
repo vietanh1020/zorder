@@ -818,6 +818,15 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
         "total_money": {
           "name": "total_money",
           "type": "int",
@@ -924,6 +933,15 @@
         },
         "order_id": {
           "name": "order_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
+        "customer_name": {
+          "name": "customer_name",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,

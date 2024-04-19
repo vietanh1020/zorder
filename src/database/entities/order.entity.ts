@@ -16,6 +16,9 @@ export class Order extends BaseEntity {
   @Property({ fieldName: 'table_id' })
   tableId: string;
 
+  @Property({ fieldName: 'customer_name' })
+  customerName: string;
+
   @Property({ fieldName: 'total_money' })
   total: number;
 

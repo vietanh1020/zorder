@@ -55,6 +55,10 @@ export class CreateOrderDto {
 
   @IsString()
   @IsNotEmpty()
+  customerName: string;
+
+  @IsString()
+  @IsNotEmpty()
   tableId: string;
 
   @ValidateNested()
