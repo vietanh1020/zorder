@@ -40,29 +40,22 @@ export class OrderService {
     date = new Date(),
     tableId = '',
   ) {
-    let isBlock = await this.cacheManager.get('blocked:' + companyId);
-    if (!!isBlock)
-      throw new BadRequestException(
-        'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
-      );
+    // let isBlock = await this.cacheManager.get('blocked:' + companyId);
+    // if (!!isBlock)
+    //   throw new BadRequestException(
+    //     'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
+    //   );
 
     let query: any = {};
 
-    if (!!status) query.status = status;
+    query.status = status;
 
     if (!!tableId) query.tableId = tableId;
 
-    if (!!date) {
-      query.createdAt = {
-        $gte: moment(date).startOf('date').toDate(),
-        $lt: moment(date).endOf('date').toDate(),
-      };
-    } else {
-      query.createdAt = {
-        $gte: moment().startOf('date').toDate(),
-        $lt: new Date(),
-      };
-    }
+    query.createdAt = {
+      $gte: moment().startOf('date').toDate(),
+      $lt: new Date(),
+    };
 
     const data = await this.orderRepository.find({
       companyId,
@@ -187,7 +180,8 @@ export class OrderService {
     return order;
   }
 
-  async endTable(tableId: string) {
+  async endTable(tableId: string, companyId: string) {
+    await this.cacheManager.del(`block_${companyId}_${tableId}`);
     let query: any = {};
     const date = new Date();
     query.createdAt = {
@@ -197,13 +191,22 @@ export class OrderService {
 
     const orders = await this.orderRepository.find({
       tableId,
+      companyId,
       ...query,
       status: 0,
     });
 
+    console.log({ orders });
+
     for (let order of orders) {
       this.orderRepository.assign(order, { status: 2 });
       await this.orderRepository.persistAndFlush(order);
+
+      const details = await this.detailRepo.find({ orderId: order.id });
+      for (let detail of details) {
+        this.detailRepo.assign(detail, { status: 2, updatedAt: date });
+        await this.detailRepo.persistAndFlush(detail);
+      }
     }
 
     return orders.map((orders) => orders.id);
@@ -228,14 +231,25 @@ export class OrderService {
   }
 
   async createOrder(order: CreateOrderDto) {
-    const { companyId } = order;
+    const { companyId, tableId, deviceToken } = order;
     const menu: any = await this.menuService.getAllFood(companyId);
-    // try {
-    //   const job = await this.orderQueue.add('create', { order, menu });
-    //   return job.finished();
-    // } catch (error) {
-    //   console.log(error);
-    // }
+
+    let isBlockTable = await this.cacheManager.get(
+      `block_${companyId}_${tableId}`,
+    );
+
+    if (!!isBlockTable && deviceToken !== isBlockTable)
+      throw new BadRequestException(
+        'Bàn này đang được phục vụ. Vui lòng chọn bàn khác hoặc liên hệ nhân viên',
+      );
+
+    if (!isBlockTable && deviceToken) {
+      await this.cacheManager.set(
+        `block_${companyId}_${tableId}`,
+        deviceToken,
+        3 * 60 * 60 * 1000,
+      );
+    }
 
     await this.notiService.sendNotify(order.companyId);
     return await this.functionOrder.createNewOrder(order, menu);

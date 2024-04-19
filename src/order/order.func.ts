@@ -39,7 +39,7 @@ export class FunctionOrder {
   createNewOrder = async (order: CreateOrderDto, menu) => {
     const orderRepo = this.entityManager.fork().getRepository(Order);
 
-    const { companyId, tableId, deviceToken } = order;
+    const { companyId, tableId, deviceToken, customerName } = order;
 
     let total = 0;
 
@@ -85,6 +85,7 @@ export class FunctionOrder {
 
       const createOrder = orderRepo.create({
         total,
+        customerName,
         foods: foodReceipt,
         tableId,
         companyId,

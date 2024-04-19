@@ -116,6 +116,15 @@ export class OrderController {
     return await this.orderService.getDailyFoodReport(date, company_id);
   }
 
+  @Get('/end-table/:table')
+  @UseGuards(AuthGuard)
+  async endTable(
+    @Param('table') table: string,
+    @JwtUser('company_id') company_id: string,
+  ) {
+    return await this.orderService.endTable(table, company_id);
+  }
+
   @Get('/year/statistics')
   @UseGuards(OwnerGuard)
   async yearStatistics(@JwtUser('company_id') company_id: string) {

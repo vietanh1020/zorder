@@ -60,12 +60,12 @@ export class MenuService {
   }
 
   async getAllFood(companyId: string, search = '') {
-    let menu: any = await this.cacheManager.get('all_food_' + companyId);
+    let menu: any = await this.cacheManager.get('menu_' + companyId);
 
     if (!menu) {
       menu = await this.foodRepository.find({ companyId });
 
-      await this.cacheManager.set('all_food_' + companyId, menu);
+      await this.cacheManager.set('menu_' + companyId, menu);
     }
 
     const newMenu: any = menu.filter((item) => {
