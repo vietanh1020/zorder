@@ -76,6 +76,21 @@ export class OrderController {
     );
   }
 
+  @Get('')
+  @UseGuards(AuthGuard)
+  async companyGetOrderHistory(
+    @JwtUser('company_id') company_id: string,
+    @Query() queries,
+  ) {
+    const { status, date = '', tableId } = queries;
+    return await this.orderService.companyGetOrderHistory(
+      company_id,
+      status,
+      date,
+      tableId,
+    );
+  }
+
   @Get('/month/statistics')
   @UseGuards(OwnerGuard)
   async statistics(

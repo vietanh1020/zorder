@@ -81,6 +81,55 @@ export class OrderService {
     return await Promise.all(detailList);
   }
 
+  async companyGetOrderHistory(
+    companyId: string,
+    status: number | undefined,
+    date = '',
+    tableId = '',
+  ) {
+    // let isBlock = await this.cacheManager.get('blocked:' + companyId);
+    // if (!!isBlock)
+    //   throw new BadRequestException(
+    //     'Dịch vụ bị block bởi vì cửa hàng chưa thanh toán',
+    //   );
+
+    let query: any = {};
+
+    if (!!tableId) query.tableId = tableId;
+    if (status >= 0) query.status = status;
+
+    if (!!date) {
+      query.createdAt = {
+        $gte: moment(date).startOf('date').toDate(),
+        $lt: moment(date).endOf('date').toDate(),
+      };
+    } else {
+      query.createdAt = {
+        $gte: moment(date).startOf('date').toDate(),
+        $lt: moment(date).endOf('date').toDate(),
+      };
+    }
+
+    const data = await this.orderRepository.find(
+      {
+        companyId,
+        ...query,
+      },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+
+    const detailList = data.map(async (item) => {
+      const details = await this.detailRepo.find({ orderId: item.id });
+
+      return {
+        ...item,
+        details,
+      };
+    });
+
+    return await Promise.all(detailList);
+  }
+
   async cancelOrder(id: string, companyId: string) {
     const order = await this.orderRepository.findOne({ id, companyId });
 

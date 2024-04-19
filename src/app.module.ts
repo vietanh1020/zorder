@@ -40,16 +40,12 @@ import { CategoryModule } from './category/category.module';
 
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.example.com',
-        port: 587,
+        host: 'smtp.gmail.com',
+        port: 465,
         auth: {
-          user: 'username',
-          pass: 'password',
+          user: 'vak63.uet.vnu@gmail.com',
+          pass: 'bevl oxoh fxyj fqwq',
         },
-      },
-      template: {
-        dir: join(__dirname, 'templates'),
-        adapter: new HandlebarsAdapter(),
       },
     }),
 

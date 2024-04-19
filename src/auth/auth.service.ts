@@ -6,6 +6,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -32,6 +33,27 @@ export class AuthService {
     private readonly deviceRepository: EntityRepository<Device>,
     private entityManager: EntityManager,
   ) {}
+
+  async checkEmail(email: string) {
+    const user = await this.usersRepository.findOne({ email });
+    if (user) return false;
+    return true;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersRepository.findOne({ email });
+    if (!user) throw new NotFoundException('Email not found');
+
+    const tokenData = {
+      id: user.id,
+      email: user.email,
+      company_id: user.companyId,
+      role: user.role,
+    };
+
+    const accessToken = await this.generateToken(tokenData, 'accessToken');
+    return accessToken;
+  }
 
   async generateToken(data: JwtDecoded, type: TokenType) {
     let expiresIn = '1d';

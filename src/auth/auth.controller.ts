@@ -2,6 +2,7 @@ import { AuthGuard } from '@/common/guards';
 import {
   Body,
   Controller,
+  Get,
   Post,
   Req,
   Response,
@@ -15,10 +16,14 @@ import {
 } from './dto';
 import { AuthService } from './auth.service';
 import { JwtUser } from '@/common/decorators';
+import { MailService } from './mail.service';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailService: MailService,
+  ) {}
 
   @Post('/admin')
   async createAdmin(@Body() adminDto: CreateAdminDto, @Response() res) {
@@ -31,6 +36,22 @@ export class AuthController {
     });
 
     return res.send(user);
+  }
+
+  @Get('/check-invalid-email')
+  async checkEmail(@Body() body: { email: string }) {
+    return await this.authService.checkEmail(body.email);
+  }
+
+  @Post('/forgot-password')
+  async forgotPassword(
+    @Body() body: { email: string; domain: string | undefined },
+  ) {
+    const token = await this.authService.forgotPassword(body.email);
+    return await this.mailService.sendResetPasswordEmail({
+      ...body,
+      token,
+    });
   }
 
   @Post('/google')
