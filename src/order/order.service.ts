@@ -76,8 +76,8 @@ export class OrderService {
 
   async companyGetOrderHistory(
     companyId: string,
-    status: number | undefined,
-    date = '',
+    status = 0,
+    date = new Date(),
     tableId = '',
   ) {
     // let isBlock = await this.cacheManager.get('blocked:' + companyId);
@@ -89,26 +89,18 @@ export class OrderService {
     let query: any = {};
 
     if (!!tableId) query.tableId = tableId;
-    if (status >= 0) query.status = status;
 
-    if (!!date) {
-      query.createdAt = {
-        $gte: moment(date).startOf('date').toDate(),
-        $lt: moment(date).endOf('date').toDate(),
-      };
-    } else {
-      query.createdAt = {
-        $gte: moment(date).startOf('date').toDate(),
-        $lt: moment(date).endOf('date').toDate(),
-      };
-    }
+    query.createdAt = {
+      $gte: moment().startOf('date').toDate(),
+      $lt: new Date(),
+    };
 
     const data = await this.orderRepository.find(
       {
         companyId,
         ...query,
       },
-      { orderBy: { createdAt: 'ASC' } },
+      { orderBy: { createdAt: 'DESC' } },
     );
 
     const detailList = data.map(async (item) => {

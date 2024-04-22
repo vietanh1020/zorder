@@ -72,7 +72,7 @@ export class OrderController {
     );
   }
 
-  @Get('')
+  @Get('/history')
   @UseGuards(AuthGuard)
   async companyGetOrderHistory(
     @JwtUser('company_id') company_id: string,
