@@ -112,7 +112,7 @@ export class OrderController {
     return await this.orderService.getDailyFoodReport(date, company_id);
   }
 
-  @Get('/end-table/:table')
+  @Put('/end-table/:table')
   @UseGuards(AuthGuard)
   async endTable(
     @Param('table') table: string,
