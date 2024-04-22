@@ -23,12 +23,8 @@ export class OrderController {
   }
 
   @Put('/cancel/:id')
-  @UseGuards(AuthGuard)
-  async cancelOrder(
-    @Param('id') id: string,
-    @JwtUser('company_id') company: string,
-  ) {
-    return await this.orderService.cancelOrder(id, company);
+  async cancelFoodOrder(@Param('id') id: string) {
+    return await this.orderService.cancelOrder(id);
   }
 
   @Put('/status/:id')

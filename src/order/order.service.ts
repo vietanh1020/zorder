@@ -123,19 +123,17 @@ export class OrderService {
     return await Promise.all(detailList);
   }
 
-  async cancelOrder(id: string, companyId: string) {
-    const order = await this.orderRepository.findOne({ id, companyId });
+  async cancelOrder(id: string) {
+    const orderDetail = await this.detailRepo.findOne({ id });
 
-    if (!order) throw new NotFoundException(`Order with not found`);
-    if (order.status === 2)
+    if (orderDetail.status !== 0)
       throw new BadRequestException(
-        'Order đã kết thúc không thể chuyển trạng thái',
+        `Cửa hàng đã chuẩn bị món cho bạn không thể hủy`,
       );
-
-    this.orderRepository.assign(order, { status: -1 });
-
-    await this.orderRepository.persistAndFlush(order);
-    return order;
+    this.detailRepo.assign(orderDetail, { status: -1 });
+    await this.detailRepo.persistAndFlush(orderDetail);
+    await this.notiService.sendNotify(orderDetail.companyId);
+    return orderDetail;
   }
 
   async approveOrder(id: string, companyId: string) {
@@ -195,8 +193,6 @@ export class OrderService {
       ...query,
       status: 0,
     });
-
-    console.log({ orders });
 
     for (let order of orders) {
       this.orderRepository.assign(order, { status: 2 });
@@ -286,6 +282,7 @@ export class OrderService {
     const month = now.getMonth() + 1;
 
     const menu: any = await this.menuService.getAllFood(companyId);
+    const foodIds = menu.map((item) => item.id);
 
     if (menu?.length === 0) return menu;
 
@@ -297,10 +294,10 @@ export class OrderService {
     `;
 
     const statistic: any = {};
-    menu.forEach((element) => {
-      const { name } = element;
-      statistic[element.id] = { name, count: 0 };
-    });
+    // menu.forEach((element) => {
+    //   const { name } = element;
+    //   statistic[element.id] = { name, count: 0 };
+    // });
 
     const orders = await this.em
       .getConnection()
@@ -313,6 +310,7 @@ export class OrderService {
       .flat();
 
     foodInOder.map(({ food, quantity }) => {
+      statistic[food.id] = { name: food.name, count: 0 };
       return (statistic[food.id].count += quantity);
     });
 
