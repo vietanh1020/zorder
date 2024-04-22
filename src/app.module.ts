@@ -18,6 +18,7 @@ import { PaymentModule } from './payment/payment.module';
 import { UserModule } from './user/user.module';
 import { CronjobModule } from './cronjob/cronjob.module';
 import { CategoryModule } from './category/category.module';
+import { BillModule } from './bill/bill.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { CategoryModule } from './category/category.module';
     UserModule,
     CategoryModule,
     CronjobModule,
+    BillModule,
   ],
   controllers: [AppController],
   providers: [AppService],
