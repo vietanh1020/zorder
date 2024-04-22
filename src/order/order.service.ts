@@ -1,4 +1,4 @@
-import { Order, OrderDetail } from '@/database/entities';
+import { Bill, Order, OrderDetail } from '@/database/entities';
 import { MenuService } from '@/menu/menu.service';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -26,6 +26,10 @@ export class OrderService {
 
     @InjectRepository(Order)
     private readonly orderRepository: EntityRepository<Order>,
+
+    @InjectRepository(Bill)
+    private readonly billRepo: EntityRepository<Bill>,
+
     @InjectRepository(OrderDetail)
     private readonly detailRepo: EntityRepository<OrderDetail>,
     private readonly menuService: MenuService,
@@ -187,17 +191,26 @@ export class OrderService {
     });
 
     for (let order of orders) {
-      this.orderRepository.assign(order, { status: 2 });
+      this.orderRepository.assign(order, { status: 3 });
       await this.orderRepository.persistAndFlush(order);
 
       const details = await this.detailRepo.find({ orderId: order.id });
       for (let detail of details) {
-        this.detailRepo.assign(detail, { status: 2, updatedAt: date });
+        this.detailRepo.assign(detail, { status: 3, updatedAt: date });
         await this.detailRepo.persistAndFlush(detail);
       }
     }
 
-    return orders.map((orders) => orders.id);
+    const orderIds = orders.map((orders) => orders.id);
+
+    const createBill = this.billRepo.create({
+      orderIds,
+      companyId,
+    });
+
+    await this.billRepo.persistAndFlush(createBill);
+
+    return orderIds;
   }
 
   async getOrderDetails(id: string, companyId: string) {
