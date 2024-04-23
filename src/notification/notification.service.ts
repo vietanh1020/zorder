@@ -23,7 +23,10 @@ export class NotificationService {
     return this.firebaseAdmin;
   }
 
-  async sendNotify(companyId: string): Promise<void> {
+  async sendNotify(
+    companyId: string,
+    body = 'Bạn có 1 đơn hàng mới',
+  ): Promise<void> {
     const firebaseAdmin = this.getFirebaseAdmin();
 
     try {
@@ -35,7 +38,7 @@ export class NotificationService {
         const msg: any = {
           notification: {
             title: 'Zorder',
-            body: 'You have new Order',
+            body,
           },
           token: user.token,
         };
@@ -53,7 +56,7 @@ export class NotificationService {
       const msg: any = {
         notification: {
           title: 'Zorder',
-          body: 'You have new update status',
+          body: 'Có cập nhật mới cho đơn của bạn',
         },
         token: token,
       };

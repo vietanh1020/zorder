@@ -97,4 +97,9 @@ export class AuthController {
 
     return res.send(user);
   }
+
+  @Post('/logout')
+  async logout(@Body() { deviceToken }: { deviceToken: string | undefined }) {
+    return await this.authService.logout(deviceToken);
+  }
 }

@@ -199,6 +199,15 @@ export class AuthService {
     };
   }
 
+  async logout(token: string | undefined) {
+    if (!token) return true;
+    const deviceToken = await this.deviceRepository.findOne({
+      token,
+    });
+    if (deviceToken) await this.deviceRepository.removeAndFlush(deviceToken);
+    return true;
+  }
+
   async inviteStaff(staffDto: CreateStaffDto, companyId: string) {
     await this.checkUserNotExist(staffDto.email);
 

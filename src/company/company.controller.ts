@@ -30,6 +30,12 @@ export class CompanyController {
     return this.companyService.getCompany(companyId);
   }
 
+  @UseGuards(AuthGuard)
+  @Get('/table')
+  async getTableStatus(@JwtUser('company_id') companyId: string) {
+    return this.companyService.getTableStatus(companyId);
+  }
+
   @Get(':id')
   async getCompanyDetail(@Param('id') companyId: string) {
     return this.companyService.getCompany(companyId);

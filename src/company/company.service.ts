@@ -5,14 +5,20 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/postgresql';
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CompanyDto } from './dto';
 
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+
 @Injectable()
 export class CompanyService {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+
     @InjectRepository(Company)
     private readonly companyRepository: EntityRepository<Company>,
     private entityManager: EntityManager,
@@ -32,5 +38,18 @@ export class CompanyService {
 
   async getCompany(id: string) {
     return await this.companyRepository.findOne({ id });
+  }
+
+  async getTableStatus(companyId: string) {
+    try {
+      const table: string | undefined = await this.cacheManager.get(
+        `Table_${companyId}`,
+      );
+      return table ? JSON.parse(table) : [];
+    } catch (error) {
+      return [];
+    }
+
+    // return await this.cacheManager.get(`Table_${companyId}`);
   }
 }

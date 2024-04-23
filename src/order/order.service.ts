@@ -53,8 +53,6 @@ export class OrderService {
 
     let query: any = {};
 
-    query.status = status;
-
     if (!!tableId) query.tableId = tableId;
 
     query.createdAt = {
@@ -64,6 +62,7 @@ export class OrderService {
 
     const data = await this.orderRepository.find({
       companyId,
+      status: { $in: [0, 1] },
       ...query,
     });
 
@@ -129,7 +128,10 @@ export class OrderService {
       );
     this.detailRepo.assign(orderDetail, { status: FoodStatus.cancel });
     await this.detailRepo.persistAndFlush(orderDetail);
-    await this.notiService.sendNotify(orderDetail.companyId);
+    await this.notiService.sendNotify(
+      orderDetail.companyId,
+      `Khách hàng đã cập nhật đơn`,
+    );
     return orderDetail;
   }
 
@@ -237,6 +239,21 @@ export class OrderService {
 
     await this.billRepo.persistAndFlush(createBill);
 
+    try {
+      const tablesInCache: string | undefined = await this.cacheManager.get(
+        `Table_${companyId}`,
+      );
+      let tables = [];
+      if (tablesInCache) tables = JSON.parse(tablesInCache);
+      const tableCache = tables.filter((table) => table !== tableId);
+      await this.cacheManager.set(
+        `Table_${companyId}`,
+        JSON.stringify(tableCache),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
     return orderIds;
   }
 
@@ -271,6 +288,18 @@ export class OrderService {
     let isBlockTable = await this.cacheManager.get(
       `block_${companyId}_${tableId}`,
     );
+
+    if (!isBlockTable) {
+      const tablesInCache: string | undefined = await this.cacheManager.get(
+        `Table_${companyId}`,
+      );
+      let tables = [];
+      if (tablesInCache) tables = JSON.parse(tablesInCache) || [];
+      await this.cacheManager.set(
+        `Table_${companyId}`,
+        JSON.stringify([...tables, tableId]),
+      );
+    }
 
     if (!!isBlockTable && deviceToken !== isBlockTable)
       throw new BadRequestException(
