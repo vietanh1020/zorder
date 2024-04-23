@@ -17,6 +17,7 @@ import { CreateOrderDto } from './dto';
 import { FunctionOrder } from './order.func';
 import { EntityManager } from '@mikro-orm/core';
 import { NotificationService } from '@/notification/notification.service';
+import { FoodStatus } from '@/untils';
 
 @Injectable()
 export class OrderService {
@@ -122,11 +123,11 @@ export class OrderService {
   async cancelOrder(id: string) {
     const orderDetail = await this.detailRepo.findOne({ id });
 
-    if (orderDetail.status !== 0)
+    if (orderDetail.status !== FoodStatus.pending)
       throw new BadRequestException(
         `Cửa hàng đã chuẩn bị món cho bạn không thể hủy`,
       );
-    this.detailRepo.assign(orderDetail, { status: -1 });
+    this.detailRepo.assign(orderDetail, { status: FoodStatus.cancel });
     await this.detailRepo.persistAndFlush(orderDetail);
     await this.notiService.sendNotify(orderDetail.companyId);
     return orderDetail;
@@ -168,11 +169,21 @@ export class OrderService {
 
     if (!order) throw new NotFoundException(`Order with not found`);
 
-    this.orderRepository.assign(order, { status: 2 });
+    this.orderRepository.assign(order, { status: FoodStatus.success });
 
     await this.orderRepository.persistAndFlush(order);
     return order;
   }
+
+  getTotalOption = (options: any) => {
+    let total = 0;
+    for (let item of options) {
+      for (let option of item?.data) {
+        total = total + option.price;
+      }
+    }
+    return total;
+  };
 
   async endTable(tableId: string, companyId: string) {
     await this.cacheManager.del(`block_${companyId}_${tableId}`);
@@ -187,16 +198,29 @@ export class OrderService {
       tableId,
       companyId,
       ...query,
-      status: 0,
+      status: FoodStatus.pending,
     });
 
-    for (let order of orders) {
-      this.orderRepository.assign(order, { status: 3 });
-      await this.orderRepository.persistAndFlush(order);
+    let totalPrice = 0;
 
+    for (let order of orders) {
+      this.orderRepository.assign(order, { status: FoodStatus.success });
+      await this.orderRepository.persistAndFlush(order);
       const details = await this.detailRepo.find({ orderId: order.id });
       for (let detail of details) {
-        this.detailRepo.assign(detail, { status: 3, updatedAt: date });
+        if (
+          detail.status == FoodStatus.deny ||
+          detail.status == FoodStatus.cancel
+        )
+          continue;
+
+        totalPrice +=
+          detail.detail.price + this.getTotalOption(detail.detail.options);
+
+        this.detailRepo.assign(detail, {
+          status: FoodStatus.success,
+          updatedAt: date,
+        });
         await this.detailRepo.persistAndFlush(detail);
       }
     }
@@ -204,6 +228,9 @@ export class OrderService {
     const orderIds = orders.map((orders) => orders.id);
 
     const createBill = this.billRepo.create({
+      customerName: orders[0].customerName,
+      total: totalPrice,
+      table: orders[0].tableId,
       orderIds,
       companyId,
     });
@@ -226,7 +253,13 @@ export class OrderService {
 
   async customerGetOrder(ids: string) {
     const idArr = ids.split('+');
-    const detail = await this.detailRepo.find({ orderId: { $in: idArr } });
+
+    const orders = await this.orderRepository.find({
+      id: { $in: idArr },
+      status: FoodStatus.pending,
+    });
+    const orderIds = orders.map((item) => item.id);
+    const detail = await this.detailRepo.find({ orderId: { $in: orderIds } });
 
     return detail.sort();
   }
