@@ -94,10 +94,10 @@ export class OrderService {
 
     if (!!tableId) query.tableId = tableId;
 
-    query.createdAt = {
-      $gte: moment().startOf('date').toDate(),
-      $lt: new Date(),
-    };
+    // query.createdAt = {
+    //   $gte: moment().startOf('date').toDate(),
+    //   $lt: new Date(),
+    // };
 
     const data = await this.orderRepository.find(
       {
