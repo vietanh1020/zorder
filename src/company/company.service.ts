@@ -45,7 +45,8 @@ export class CompanyService {
       const table: string | undefined = await this.cacheManager.get(
         `Table_${companyId}`,
       );
-      return table ? JSON.parse(table) : [];
+      const res = table ? JSON.parse(table) : [];
+      return res.map((t: string) => +t);
     } catch (error) {
       return [];
     }
