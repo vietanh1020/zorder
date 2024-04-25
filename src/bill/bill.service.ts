@@ -40,6 +40,6 @@ export class BillService {
 
     const foods = detail.filter((item) => !FailedStatus.includes(item.status));
 
-    return foods.sort();
+    return { ...orderInBill, detail: foods.sort() };
   }
 }
