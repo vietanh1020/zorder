@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ChangePassDto,
   CreateAdminDto,
   CreateStaffDto,
   DeviceTokenDto,
@@ -52,6 +53,15 @@ export class AuthController {
       ...body,
       token,
     });
+  }
+
+  @Post('/change-password')
+  @UseGuards(AuthGuard)
+  async changePassword(
+    @Body() body: ChangePassDto,
+    @JwtUser('id') userId: string,
+  ) {
+    return await this.authService.changePassword(body, userId);
   }
 
   @Post('/google')

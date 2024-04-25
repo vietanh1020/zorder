@@ -14,6 +14,7 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { error } from 'console';
 import {
+  ChangePassDto,
   CreateAdminDto,
   CreateStaffDto,
   DeviceTokenDto,
@@ -53,6 +54,24 @@ export class AuthService {
 
     const accessToken = await this.generateToken(tokenData, 'accessToken');
     return accessToken;
+  }
+
+  async changePassword(loginDto: ChangePassDto, id: string) {
+    const { newPassword, password } = loginDto;
+    const user = await this.usersRepository.findOne({
+      id,
+    });
+
+    const validPassword = await bcrypt.compare(password, user?.password || '');
+
+    if (!user || !validPassword)
+      throw new BadRequestException('Mật khẩu không đúng!');
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashed = bcrypt.hashSync(newPassword, salt);
+
+    this.usersRepository.assign(user, { password: hashed });
+    return await this.usersRepository.persistAndFlush(user);
   }
 
   async generateToken(data: JwtDecoded, type: TokenType) {
