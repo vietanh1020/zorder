@@ -25,7 +25,7 @@ import { BillModule } from './bill/bill.module';
     CacheModule.register({
       isGlobal: true,
       store: redisStore,
-      host: process.env.REDIS_HOST,
+      host: 'redis',
       port: process.env.REDIS_PORT,
     }),
     ConfigModule.forRoot({
@@ -34,7 +34,7 @@ import { BillModule } from './bill/bill.module';
     }),
     BullModule.forRoot({
       redis: {
-        host: 'localhost',
+        host: 'redis',
         port: 6379,
       },
     }),

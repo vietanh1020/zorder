@@ -1,20 +1,21 @@
 version: '3.5'
 
 services:
-  # app:
-  #   container_name: ${APP_ID}
-  #   image: ${APP_ID}
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 3003:3003
-  #   volumes:
-  #     - .:/app
-  #     - /app/dist
-  #     - /app/node_modules
-  #   networks:
-  #     - lumyri-network
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3003:3003
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - lumyri-network
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
 
   postgres:
     image: postgres:14.4-alpine
