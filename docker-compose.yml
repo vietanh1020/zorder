@@ -1,25 +1,21 @@
 version: '3.5'
 
 services:
-  # app:
-  #   container_name: ${APP_ID}
-  #   image: ${APP_ID}
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - ${APP_PORT}:${APP_PORT}
-  #   volumes:
-  #     - .:/app
-  #     - /app/dist
-  #     - /app/node_modules
-  #   networks:
-  #     - lumyri-network
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1.0'
-  #         memory: 1024M
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3003:3003
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - lumyri-network
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
 
   postgres:
     image: postgres:14.4-alpine
@@ -36,6 +32,25 @@ services:
       - ./.docker/postgres/entrypoint:/docker-entrypoint-initdb.d
     networks:
       - lumyri-network
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - lumyri-network
+
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: redis-commander
+  #   restart: unless-stopped
+  #   environment:
+  #     - REDIS_HOSTS=redis
+  #   ports:
+  #     - ${REDIS_COMMAND_PORT:-8081}:8081
+  #   networks:
+  #     - lumyri-network
 
   minio:
     image: minio/minio:RELEASE.2022-10-08T20-11-00Z

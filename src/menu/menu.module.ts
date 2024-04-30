@@ -1,12 +1,14 @@
+import { Category, Food, FoodOption } from '@/database/entities';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
-import { Menu } from '../database/entities/menu.entity';
+import { JwtService } from '@nestjs/jwt';
+import { MenuController } from './menu.controller';
 import { MenuService } from './menu.service';
-import { MenuController } from './menu.controler';
+import { MinioService } from '@/minio/minio.service';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Menu])],
-  providers: [MenuService],
+  imports: [MikroOrmModule.forFeature([Food, FoodOption, Category])],
   controllers: [MenuController],
+  providers: [MenuService, JwtService, MinioService],
 })
 export class MenuModule {}

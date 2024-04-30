@@ -1,17 +1,14 @@
 import { Entity, Property } from '@mikro-orm/core';
 import { BaseEntity } from './base.entity';
 
-@Entity({ tableName: 'menu' })
-export class Menu extends BaseEntity {
+@Entity({ tableName: 'device' })
+export class Device extends BaseEntity {
   @Property({ fieldName: 'company_id' })
   companyId: string;
 
   @Property()
-  name: string;
+  token: string;
 
-  @Property()
-  image: string;
-
-  @Property()
-  description: string;
+  @Property({ fieldName: 'user_id' })
+  userId: string;
 }
