@@ -7,15 +7,18 @@ import { CronjobService } from './cronjob/cronjob.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const cronService = app.get(CronjobService);
-  cronService.startCronJob();
+  // const cronService = app.get(CronjobService);
+  // cronService.startCronJob();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
     }),
   );
 
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
   app.use(cookieParser());
 
