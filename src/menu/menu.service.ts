@@ -166,7 +166,10 @@ export class MenuService {
       throw new NotFoundException(`Food with ID ${id} not found`);
     }
 
-    this.foodRepository.assign(food, updateFood);
+    this.foodRepository.assign(food, {
+      ...updateFood,
+      image: updateFood?.image ? updateFood?.image : food.image,
+    });
 
     await this.foodRepository.persistAndFlush(food);
 

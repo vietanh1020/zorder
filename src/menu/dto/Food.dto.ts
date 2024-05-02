@@ -3,6 +3,7 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -43,9 +44,9 @@ export class FoodUpdateDto {
   @IsNotEmpty()
   name: string;
 
-  // @IsString()
-  // @IsNotEmpty()
-  // image: string;
+  @IsString()
+  @IsOptional()
+  image: string;
 
   @IsNumber()
   @IsNotEmpty()
