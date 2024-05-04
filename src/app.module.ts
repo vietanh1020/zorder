@@ -26,7 +26,7 @@ import { BillModule } from './bill/bill.module';
       isGlobal: true,
       store: redisStore,
       host: 'redis',
-      port: process.env.REDIS_PORT,
+      port: 6379,
     }),
     ConfigModule.forRoot({
       load: [appConfig],

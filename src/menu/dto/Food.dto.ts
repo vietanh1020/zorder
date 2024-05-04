@@ -31,11 +31,13 @@ export class FoodDto {
   priceOrigin: number;
 
   @IsString()
+  @IsOptional()
   description: string;
 
-  @ValidateNested()
-  @IsArray()
-  @Type(() => CreateFoodOptionDto)
+  // @ValidateNested()
+  // @IsArray()
+  // @Type(() => CreateFoodOptionDto)
+  @IsOptional()
   foodOption: CreateFoodOptionDto[];
 }
 
@@ -61,5 +63,6 @@ export class FoodUpdateDto {
   priceOrigin: number;
 
   @IsString()
+  @IsOptional()
   description: string;
 }
