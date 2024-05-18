@@ -15,7 +15,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://zorder.site',
+    origin: 'https://vietanh18-git-main-vietanh1020s-projects.vercel.app',
     credentials: true,
   });
 
