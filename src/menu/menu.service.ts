@@ -63,7 +63,10 @@ export class MenuService {
     let menu: any = await this.cacheManager.get('menu_' + companyId);
 
     if (!menu) {
-      menu = await this.foodRepository.find({ companyId });
+      menu = await this.foodRepository.find(
+        { companyId },
+        { populate: ['options'] },
+      );
 
       await this.cacheManager.set('menu_' + companyId, menu);
     }
