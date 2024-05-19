@@ -15,7 +15,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'https://app.zorder.site',
+    origin: 'https://zorder.site',
     credentials: true,
   });
 
