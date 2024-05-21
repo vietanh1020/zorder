@@ -362,10 +362,6 @@ export class OrderService {
     `;
 
     const statistic: any = {};
-    // menu.forEach((element) => {
-    //   const { name } = element;
-    //   statistic[element.id] = { name, count: 0 };
-    // });
 
     const orders = await this.em
       .getConnection()
@@ -402,10 +398,10 @@ export class OrderService {
     const rawQuery = `SELECT o.foods FROM "order" o WHERE  o.company_id = ? AND DATE(o.created_at) = ? `;
 
     const statistic: any = {};
-    menu.forEach((element) => {
-      const { name } = element;
-      statistic[element.id] = { name, count: 0 };
-    });
+    // menu.forEach((element) => {
+    //   const { name } = element;
+    //   statistic[element.id] = { name, count: 0 };
+    // });
 
     const orders = await this.em
       .getConnection()
@@ -418,7 +414,15 @@ export class OrderService {
       .flat();
 
     foodInOder.map(({ food, quantity }) => {
-      return (statistic[food.id].count += quantity);
+      if (statistic[food.id]) {
+        statistic[food.id] = {
+          name: food.name,
+          count: (statistic[food.id].count =
+            statistic[food.id].count + quantity),
+        };
+      } else {
+        statistic[food.id] = { name: food.name, count: quantity };
+      }
     });
 
     return statistic;
