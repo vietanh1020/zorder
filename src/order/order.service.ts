@@ -378,8 +378,15 @@ export class OrderService {
       .flat();
 
     foodInOder.map(({ food, quantity }) => {
-      statistic[food.id] = { name: food.name, count: 0 };
-      return (statistic[food.id].count += quantity);
+      if (statistic[food.id]) {
+        statistic[food.id] = {
+          name: food.name,
+          count: (statistic[food.id].count =
+            statistic[food.id].count + quantity),
+        };
+      } else {
+        statistic[food.id] = { name: food.name, count: quantity };
+      }
     });
 
     return statistic;
